@@ -96,25 +96,6 @@ export class DefnMacro implements IMacro {
     }
 }
 
-// export class StrToListMacro implements IMacro {
-//     name = 'str->list';
-//     expand = (args: Token[], env) => {
-//         if (!args) return undefined;
-
-//         console.log("Expanding macro StrToList. Args = " + JSON.stringify(args));
-//         let res = args
-//             .filter(s => s.type == Tokens.STRING)
-//             .map(s => s["str"].split(""))
-//             .map(c => {return {type: Tokens.STRING, str: c, line: args[0].line}});
-
-//         let ret = {type: Tokens.EXPRESSION, tokens: res, line: args[0].line};
-
-//         console.log("Expanding macro StrToList. Returning " + JSON.stringify(ret));
-
-//         return expandMacros(ret, env);
-//     };
-// }
-
 export class EvalMacro implements IMacro {
     name = 'eval';
     expand = (args: Item[], env):Item => {
@@ -128,7 +109,6 @@ export class EvalMacro implements IMacro {
         )]);
     }
 }
-
 
 export class LambdaMacro implements IMacro {
     constructor(public name: string = 'lambda') {}
