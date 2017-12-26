@@ -48,14 +48,15 @@ For example
 ```lisp
 (class Person
     "It representa a Person, with a name, a surname and a fullname method"
-    (define name "" get set)
-    (define surname "" get)
+    (define name "" get set "This property represents the name of the person") ;; Yes, this documentation is redundant
+    (define surname "" get "This property represents the surname of the person")
     
     (defconstructor (n s)
         (set! name n)
         (set! surname s))
         
     (defmethod fullname () 
+        "Returns the full name of the person, in the form 'name surname'"
         (concat name " " surname)))
 
 (define p (new Person "John" "Smith"))
@@ -66,6 +67,8 @@ For example
 (-> p name set "Bob"))
 (print (-> p fullname)) ;; This would print "Bob Smith"
 (-> p surname set "Doe")) ;; This would throw an exception
+(print (-> p class _doc)) ;; This would print "It representa a Person, with a name, a surname and a fullname method"
+(print (-> p fullname _doc)) ;; This would print "Returns the full name of the person, in the form 'name surname'"
 ```
 
 This is not very Lispy, but it would be usefull to explore the implementation of an object oriented dialect of Lisp
