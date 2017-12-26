@@ -72,5 +72,11 @@ For example
 ```
 
 This is not very Lispy, but it would be usefull to explore the implementation of an object oriented dialect of Lisp
-purely implemented in Lisp functions and macros.
+purely implemented in Lisp functions and macros and without any special support by the interpreter itself. As such, it should be possible to load this functionality as an optional package, with something as:
+
+```lisp
+(require 'class_system)
+
+;; And now we have classes, etc
+```
 
