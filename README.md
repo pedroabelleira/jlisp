@@ -50,11 +50,13 @@ For example
     "It representa a Person, with a name, a surname and a fullname method"
     (define name "" get set)
     (define surname "" get)
+    
     (defconstructor (n s)
         (set! name n)
-        (set! surname s)
+        (set! surname s))
+        
     (defmethod fullname () 
-        (concat name " " surname))))
+        (concat name " " surname)))
 
 (define p (new Person "John" "Smith"))
 (print (-> p fullname))  ;; This would print "Bob Smith"
