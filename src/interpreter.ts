@@ -119,7 +119,7 @@ export interface INamedFunction {
 
 export interface IMacro {
     name: string;
-    expand: (tokens: Item[], env) => Item;
+    expand: (tokens: Item[], env: IEnvironment) => Item;
 }
 
 export interface IEnvironment {
