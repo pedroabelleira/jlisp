@@ -56,14 +56,13 @@ export function parse(program: string): Item[] {
  * @param tokens List of tokens representing the text of the program
  */
 export function parseTokenList(tokens: RawToken[]): Item[] {
-    tokens = tokens.reverse();
     let items: Item[] = [];
 
-    let t = tokens.pop();
+    let t = tokens.shift();
 
     while (tokens.length > 0) {
         items.push(parseToken(t, tokens));
-        t = tokens.pop();
+        t = tokens.shift();
     }
 
     return items;
@@ -77,14 +76,14 @@ function parseToken(initialToken: RawToken, rest: RawToken[]): ListType {
     let t: RawToken;
     let items: Item[] = [];
 
-    t = rest.pop();
+    t = rest.shift();
     while(t && t.type != RawTokens.CLOSE_PARENS) {
         if (t.type == RawTokens.OPEN_PARENS) {
             items.push(parseToken(t, rest)); 
         } else {
             items.push(mapRawTokenToItem(t));
         }
-        t = rest.pop();
+        t = rest.shift();
     } 
     return createList(items);
 }

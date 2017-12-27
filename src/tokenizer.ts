@@ -17,7 +17,7 @@ export const RAW_NIL = 'nil';
 let line: number;
 
 /**
- * Divides the input string in tokens and classify them in types
+ * Divides the input string in tokens and classifies them in types
  *  
  * @param input program text 
  */
@@ -25,10 +25,10 @@ export function tokenize(input: string): RawToken[] {
     line = 1;
     let tokens: RawToken[] = [];
 
-    let chars: string[] = input.split('').reverse();
+    let chars: string[] = input.split('');
 
     while(chars.length > 0) {
-        const c = chars.pop();
+        const c = chars.shift();
 
         if (isBlank(c)) continue;
 
@@ -95,10 +95,10 @@ function isCloseParens(car: string) {
 
 function readNumber(ic: string, chars: string[]): RawToken {
     while (true) {
-        let c = chars.pop();
+        let c = chars.shift();
         if (!isNumber(c)) {
             if (c) { // It could be the last one...
-                chars.push(c);
+                chars.unshift(c);
             }
             return {type: RawTokens.NUMBER, val: ic, line: line};
         } else {
@@ -109,7 +109,7 @@ function readNumber(ic: string, chars: string[]): RawToken {
 
 function skipComment(ic: string, chars: string[]){
     while (true) { // Ignore everything until new line
-        let c = chars.pop();
+        let c = chars.shift();
         if (!c || c == '\n') {
             line++;
             break;
@@ -120,7 +120,7 @@ function skipComment(ic: string, chars: string[]){
 function readString(ic: string, chars: string[]): RawToken {
     ic = '';
     while (true) {
-        let c = chars.pop();
+        let c = chars.shift();
         if (!c) {
             throw("Error in readString: Unmatched '\"'");
         }
@@ -134,10 +134,10 @@ function readString(ic: string, chars: string[]): RawToken {
 
 function readSymbol(ic: string, chars: string[]): RawToken {
     while(true) {
-        let c = chars.pop();
+        let c = chars.shift();
 
         if (isBlank(c) || isOpenParens(c) || isCloseParens(c)) {
-            chars.push(c);
+            chars.unshift(c);
             if (ic == RAW_TRUE) {return {type: RawTokens.BOOLEAN, val: RAW_TRUE}}
             if (ic == RAW_FALSE) {return {type: RawTokens.BOOLEAN, val: RAW_FALSE}}
             if (ic == RAW_NIL) {return {type: RawTokens.NIL, val: RAW_NIL}}
