@@ -125,3 +125,4 @@ at least it would allow to copy and paste code from books without too much troub
 - Alternatively, make a macro which renames function and macro calls in the code to
 conform to this interpreter names. That would allow the same effect, with less trouble in the
 runtime. Of course, ugly things could happen, so this would be a little bit less robust.
+- Add &rest support to 'lambda' macro.
