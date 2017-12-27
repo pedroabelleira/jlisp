@@ -2,7 +2,7 @@ import {
     tokenize, RawToken, RawSymbolToken, RawNumberToken, RawStringToken, 
     RawOpenParensToken, RawCloseParensToken, RawTokens, RAW_NIL, RAW_TRUE, RAW_FALSE
 } from "./tokenizer";
-import { IEnvironment } from "interpreter";
+import { IEnvironment } from "./interpreter";
 
 export enum Types { 
     NUMBER = 'NUMBER', 

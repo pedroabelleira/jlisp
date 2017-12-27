@@ -6,6 +6,7 @@
     },
     "scripts": {
         "start": "cd dist && node jlisp.js",
-        "test": "cd dist/tests && node all_tests.js"
+        "test": "cd dist/tests && node all_tests.js",
+        "full": "npm install && tsc && npm test && npm start"
     }
 }

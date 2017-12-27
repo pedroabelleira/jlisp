@@ -16,16 +16,23 @@ This is a project I did just for fun, so don't expect any advanced features or w
 This is only a tool to teach myself how languages work. 
 
 ## Getting started
-In order to try the code you need to install node and typescript (npm install -g typescript).
-Once that is done you can compile the source with 'tsc'. 
+Make sure you have npm installed on your machine. Then write
 
-Once the compilation finished, go to ./dist/tests and run 'node all_tests.js'. If everything goes well, 
-all the tests should pass. In order to see what is implemented you can have a 
-look at the test files (./tests).
+```bash
+npm run full
+```
 
-In ./dist there is a loader program which, by default, reads the file ./program.lisp and tries to 
-interpret it. By default, the file program.list contains a mini REPL, which is quite broken and 
-useless for the moment. In any case, it could be used to quickly try some expressions.
+That will install dependencies, compile the source code, run the tests and, last, run the
+(not yet working) REPL.
+
+Of course, you don't want to wait for the installation and compilation each time you change
+something, so 'tsc -w' is your friend and then you can use the normal npm commands:
+
+```bash
+npm install   # Normally not needed
+npm run test  # This runs the tests and is what you execute all the time
+npm start     # It runs the REPL, but that doesn't really work yet
+```
 
 If you want to also have some fun, at the end of this README.md file, there are some smallish tasks
 that would be useful to do.
@@ -101,7 +108,6 @@ purely implemented in Lisp functions and macros and without any special support 
 ```
 
 ### Small things
-- Add a package.json file which allows to compile, test and run the REPL
 - Add lots of functions for numbers, strings and lists. We need to decide what standard to follow.
 One obvious possibility is to take Common Lisp, but change the naming conventions to be more
 modern: use '!' and not 'q' as suffix to indicate mutability, use '?' and not 'p' to indicate
