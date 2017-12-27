@@ -1,20 +1,34 @@
-# jlisp
+# jLisp
 A Lisp intepreter implemented in Typescript
 
+- [jLisp](#jlisp)
+    - [Why?](#why)
+    - [Getting started](#getting-started)
+    - [Implementation](#implementation)
+    - [What next](#what-next)
+        - [Big things](#big-things)
+            - [Defmacro](#defmacro)
+            - [Object System](#object-system)
+        - [Small things](#small-things)
+
 ## Why?
-This is a project I did just for fun, so don't expect any advance features or worry about performance, etc. This is only a
-tool to teach myself how languages work. 
+This is a project I did just for fun, so don't expect any advanced features or worry about performance, etc.
+This is only a tool to teach myself how languages work. 
 
 ## Getting started
-In order to try the code you need to install node and typescript (npm install -g typescript). Once that is done you can compile
-the source with 'tsc'. 
+In order to try the code you need to install node and typescript (npm install -g typescript).
+Once that is done you can compile the source with 'tsc'. 
 
-Once the compilation finished, go to ./dist/tests and run 'node all_tests.js'. If everything goes well, all the tests should
-pass. In order to see what is implemented you can have a look at the test files (./tests).
+Once the compilation finished, go to ./dist/tests and run 'node all_tests.js'. If everything goes well, 
+all the tests should pass. In order to see what is implemented you can have a 
+look at the test files (./tests).
 
-In ./dist there is a loader program which, by default, reads the file ./program.lisp and tries to interpret it. By default,
-the file program.list contains a mini REPL, which is quite broken and useless for the moment. In any case, it could be
-used to quickly try some expressions.
+In ./dist there is a loader program which, by default, reads the file ./program.lisp and tries to 
+interpret it. By default, the file program.list contains a mini REPL, which is quite broken and 
+useless for the moment. In any case, it could be used to quickly try some expressions.
+
+If you want to also have some fun, at the end of this README.md file, there are some smallish tasks
+that would be useful to do.
 
 ## Implementation
 The tokenizer and parser are contained in the files ./tokenizer.ts and ./parser.ts. Being Lisp the syntaxless language
@@ -40,6 +54,12 @@ ad infinitum (that's the whole advantage of Lisp).
 Note that all the values are strongly typed at runtime. You can check the types of the language in the file ./parser.ts
 
 ## What next
+### Big things
+#### Defmacro
+That's the most important addition: being able to define macros in Lisp itself. It shouldn't be too
+hard, but these things are tricky to implement. 
+
+#### Object System
 If defmacro works, I'd like to implement a simple object system on top of the language. The idea would be to allow
 values to have a class and then adding some syntactic shortcuts to make it look more like an object oriented language.
 
@@ -71,7 +91,7 @@ For example
 (print (-> p fullname _doc)) ;; This would print "Returns the full name of the person, in the form 'name surname'"
 ```
 
-This is not very Lispy, but it would be usefull to explore the implementation of an object oriented dialect of Lisp
+This is not very Lispy, but it would be useful to explore the implementation of an object oriented dialect of Lisp
 purely implemented in Lisp functions and macros and without any special support by the interpreter itself. As such, it should be possible to load this functionality as an optional package, with something as:
 
 ```lisp
@@ -80,3 +100,22 @@ purely implemented in Lisp functions and macros and without any special support 
 ;; And now we have classes, etc
 ```
 
+### Small things
+- Add a package.json file which allows to compile, test and run the REPL
+- Add lots of functions for numbers, strings and lists. We need to decide what standard to follow.
+One obvious possibility is to take Common Lisp, but change the naming conventions to be more
+modern: use '!' and not 'q' as suffix to indicate mutability, use '?' and not 'p' to indicate
+boolean functions, use x->y to indicate a function which transforms from x to y in a 
+canonical way, etc.
+- Add standard List macros, natively if needed and later in Lisp (if defmacro finally works)
+- Implement a "compiler" to Javascript. I.e. produce a standalone Javascript program which can
+be distributed and would work in any decent runtime (Nashrom). 
+- Implement a non trivial Lisp program which runs on the interpreter
+- Implement a 'scheme' macro (to be used as (require 'scheme)) which renames the existing
+functions and variables to look more like scheme. The objective is to be able to try
+scheme snippets without too much change. Of course, since the semantics won't be the same and
+most usual functions are missing, this would not help running any non trivial piece of code, but
+at least it would allow to copy and paste code from books without too much trouble
+- Alternatively, make a macro which renames function and macro calls in the code to
+conform to this interpreter names. That would allow the same effect, with less trouble in the
+runtime. Of course, ugly things could happen, so this would be a little bit less robust.
