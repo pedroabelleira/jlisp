@@ -30,10 +30,10 @@ assertRun("(/ 2 2)", 1);
 assertRun("(* 2 2 2)", 8);
 assertRun("(+ 1 1 (+ 1 1))", 4);
 
-// assertRun(`
-//     ; Check that comments work
-//     (+ 5 5)
-// `, 10);
+assertRun(`
+    ; Check that comments work
+    (+ 5 5)
+`, 10);
 
 });}
 

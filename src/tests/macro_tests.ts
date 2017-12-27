@@ -6,6 +6,7 @@ import { RAW_NIL, RAW_TRUE, RAW_FALSE } from "../tokenizer";
 
 export const MACRO_TESTS: () => void = () => { runSuite(() => {
 
+//*
 assertRun('(define val 2)', "");
 assertRun('(define val 2) (+ val 1)', 3);
 assertRun('(define val (+ 1 1)) (+ val 1)', 3);
@@ -61,7 +62,8 @@ assertRun(`
         (+ 1 1)
         (- 1 1)
     )
-`, '0');
+`, RAW_NIL); // Changed the convention. Begin now always returns nil
+// */
 
 assertRun(`
     ;;; Check that 'begin' macro works with macros
@@ -73,6 +75,7 @@ assertRun(`
     (+ a 0)
 `, '8');
 
+//*
 assertRun(`
     ;;; Check that 'set!' macro works 
     (define a 10)
@@ -151,7 +154,6 @@ assertRun(`
     (+ (eval (quote a)) 2)
 `, "3");
 
-
 // */
 
 ///////////////////////////////////////////////////////////////////////
@@ -161,8 +163,8 @@ assertRun(`
 // assertRun(`
 //     ;;; Check that defmacro allows for basic macros with 1 argument 
 //     (defmacro nil! (var)
-//         ((quote set!) var 3)
-//         ;;(list (quote set!) var 3)
+//         ;;((quote set!) var 3)
+//         (list (quote set!) var 3)
 //     )
 //     (define a 10)
 //     (nil! a)

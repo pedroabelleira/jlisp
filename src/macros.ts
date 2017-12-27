@@ -8,17 +8,10 @@ export class BeginMacro implements IMacro {
     name = 'begin';
     expand = (args: Item[], env: IEnvironment): Item => {
         args = args.map(a => expandMacros(a, env));
-        return createList([
-            createFunction((items: Item[], env: IEnvironment): Item => {
-                let ret:Item = NIL;
-                while (items && items.length > 0) {
-                    let t = items.shift();
-                    ret = evalItem(t, env);
-                }
-                return ret;
-            }),
-            ...args 
-        ]);
+
+        return createList([ createFunction((items: Item[], env: IEnvironment): Item => {
+            return NIL; // No need to do anything, since args are evaluated before calling this function
+        }), ...args]);
     }
 }
 
@@ -32,19 +25,16 @@ export class IfMacro implements IMacro {
         trueBranch = expandMacros(trueBranch, env);
         elseBranch = expandMacros(elseBranch, env);
 
-        return createList([
-            createFunction((args: Item[], env: IEnvironment): Item => {
-                let ret;
-                if (args[0] == TRUE) {
-                    ret = evalItem(trueBranch, env);
-                } else {
-                    if (!elseBranch || elseBranch == NIL) return NIL;
-                    ret = evalItem(elseBranch, env);
-                }
-                return ret;
-            }, cond.line, `<native if[${IfMacro.NUM_IFS++}]>`),
-            cond
-        ]);
+        return createList([ createFunction((args: Item[], env: IEnvironment): Item => {
+            let ret;
+            if (args[0] == TRUE) {
+                ret = evalItem(trueBranch, env);
+            } else {
+                if (!elseBranch || elseBranch == NIL) return NIL;
+                ret = evalItem(elseBranch, env);
+            }
+            return ret;
+        }, cond.line, `<native if[${IfMacro.NUM_IFS++}]>`), cond]);
     }
 }
 
@@ -55,15 +45,10 @@ export class DefineMacro implements IMacro {
         let name = args[0];
         let value = args[1];
 
-        if (!name) {
-            return NIL;
-        }
-        if (name.type != Types.VARIABLE) {
-            throw `Interpreter error in line  ${name.line}. Expression is not a symbol (${name.type})`;
+        if (!name && name.type != Types.VARIABLE) {
+            throw `[define] macro takes two arguments, the first of which must be a variable name (line = ${name.line}`;
         } 
-
         value = evalItem(expandMacros(value, env), env);
-
         env.addVariable(name["name"], value);
         return NIL;
     }
@@ -96,11 +81,9 @@ export class EvalMacro implements IMacro {
         let arg = args[0];
         if (!arg) throw "'eval' requires 1 argument";
         arg = expandMacros(arg, env);
-        return createList([
-            createFunction((args: Item[], env: IEnvironment): Item => {
-                return evalItem(arg, env);
-            }
-        )]);
+        return createList([createFunction((args: Item[], env: IEnvironment): Item => {
+            return evalItem(args[0], env);
+        }), arg]);
     }
 }
 
@@ -221,21 +204,20 @@ export class WhileMacro implements IMacro {
 
         let [cond, ...body] = args;
         body = body.map(b => expandMacros(b, env));
-        let ret = createList([
-            createFunction((args: Item[], env: IEnvironment): Item => {
-                env = env.createNestedEnvironment();
-                env.addVariable(BREAKVAR, FALSE);
+        let ret = createList([createFunction((args: Item[], env: IEnvironment): Item => {
+            env = env.createNestedEnvironment();
+            env.addVariable(BREAKVAR, FALSE);
 
-                while (evalItem(cond, env) == TRUE) {
-                    body.filter(exp => exp && exp != NIL).forEach(exp => {
-                        evalItem(exp, env);
-                        if (env.findVariable(BREAKVAR) == TRUE) {
-                            return NIL;
-                        }
-                    });
-                }
-                return NIL;
-            }),
+            while (evalItem(cond, env) == TRUE) {
+                body.filter(exp => exp && exp != NIL).forEach(exp => {
+                    evalItem(exp, env);
+                    if (env.findVariable(BREAKVAR) == TRUE) {
+                        return NIL;
+                    }
+                });
+            }
+            return NIL;
+        }),
             // cond
         ]);
 
@@ -268,7 +250,7 @@ export class SetBangMacro implements IMacro {
         return createList([
             createFunction((args: Item[], env: IEnvironment): Item => {
                 try {
-                    env.setVariable(variable["name"], evalItem(value, env));
+                    env.setVariable(variable["name"], args[0]);
                 } catch (ex) {
                     throw `[set!] error setting variable: ${ex}`;
                 }
@@ -316,28 +298,31 @@ export class ReadStringMacro implements IMacro {
     expand = (args: Item[], env: IEnvironment) => {
         let arg = args[0];
         if (!arg) throw "'read-string' requires 1 string argument";
+        arg = expandMacros(arg, env);
 
-        let expression: Item;
-
-        switch (arg.type) {
-            case Types.NIL:
-                return NIL;
-            case Types.LIST:
-            case Types.NUMBER:
-            case Types.BOOLEAN:
-            case Types.VARIABLE:
-                arg = evalItem(arg, env);
-                if (!arg || arg.type != Types.STRING) return arg;
-                // Indented passthrough
-            case Types.STRING:
-                try {
-                    let pgr = parse(arg.str)[0];
-                    let ret = expandMacros(pgr, env);
-                    return ret;
-                } catch (ex) {
-                    return createString("Exception parsing expression: " + ex);
-                }
-        }
+        return createList([ createFunction((items: Item[], env: IEnvironment) => {
+            arg = items[0];
+            switch (arg.type) {
+                case Types.NIL:
+                    return NIL;
+                case Types.LIST:
+                case Types.NUMBER:
+                case Types.BOOLEAN:
+                case Types.VARIABLE:
+                    arg = evalItem(arg, env);
+                    if (!arg || arg.type != Types.STRING) return arg;
+                    // Intented passthrough
+                case Types.STRING:
+                    try {
+                        let pgr = parse(arg.str)[0];
+                        let ret = expandMacros(pgr, env);
+                        return ret;
+                    } catch (ex) {
+                        return createString("Exception parsing expression: " + ex);
+                    }
+            }}),
+            arg
+        ]); 
     }
 }
 

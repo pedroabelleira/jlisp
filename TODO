@@ -2,3 +2,4 @@
 - Remove the 'define-macro' macro (or make it an alias for 'defmacro')
 - Add quotes ("'" "`" "," and ",@") to parser in order to make macros easier to write
 - Anything in the list at the bottom of README.md
+- Implement 'let'
