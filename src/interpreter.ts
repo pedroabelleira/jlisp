@@ -164,12 +164,9 @@ class Environment implements IEnvironment {
 
     setVariable(name: string, item: Item): void {
         let variable: Item = this.ownSymbols[name];
-        if (variable) {
+        if (variable || !this.parent || !this.parent.findVariable(name)) {
             this.ownSymbols[name] = item;
             return;
-        }
-        if (!this.parent) {
-            throw `Variable ${name} doesn't exist. Impossible to set value`;
         }
         this.parent.setVariable(name, item);
     }
