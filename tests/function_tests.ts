@@ -94,19 +94,20 @@ assertRun(`
     (if (= (sum 3 2) (+ 3 2)) 1 0)
 `, '0');
 
-assertRun(
-`
+assertRun(`
     ;;; Checks that strlen works
     (strlen "Hello")
-`
-, 5);
+`, 5);
 
-assertRunError(
-`
+assertRun(`
+    ;;; Checks that strlen works
+    (strlen "")
+`, 0);
+
+assertRunError(`
     ;;; Checks that strlen works
     (strlen 3)
-`
-, "function requires"); 
+`, "takes 1 string argument"); 
 
 assertRun(`
     ;;; Check that the factorial program works 
@@ -140,12 +141,18 @@ assertRun(`
     (factorial 5)
 `, '120');
 
+assertRun(`
+    ;;; Check that str->list works correctly 
+    (car (cdr (str->list "Hello")))
+`, '"e"');
+
 ////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////
 // These don't work yet
 ///////////////////////////////////////////////////////////////////////
+
 // assertRun(`
 //     ;;; Check that str can be defined in lisp 
 
@@ -163,10 +170,6 @@ assertRun(`
 
 // `, TRUE);
 
-// assertRun(`
-//     ;;; Check that str->list works correctly 
-//     (car (str->list "Hello"))
-// `, 'H');
 
 
 });}

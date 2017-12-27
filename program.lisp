@@ -1,23 +1,24 @@
 (define command "")
 
-(defn replw (p)
+(defn replw (prompt)
     (while true
         (begin
-            (set! command (read p))
-            (if (= command "exit") (break))
-            (print (eval (read-string command))))))
+        (set! command (read prompt))
+        (if (= command "exit") (break))
+        (print (eval (read-string command))))))
 
-(defn replr (p)
+(defn replr (prompt)
     (begin
-        (define command (read p))
-        (if (!= command "exit") 
-            (begin
-                (print (eval (read-string command)))
-                (replr p)))))
+    (set! command (read prompt))
+    (if (!= command "exit") 
+        (begin
+        (print (eval (read-string command)))
+        (replr p)))))
 
 (print "")
 (print "Basic Lisp REPL.")
 (print "Type Lisp code to be evaluated. To leave type 'exit'")
 (print "")
-(replr ">> ")
+;; (replw ">> ")
+(set! command (read "Hey!!! "))
 (print "Exiting...")

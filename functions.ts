@@ -1,4 +1,4 @@
-import { INamedFunction } from "./interpreter";
+import { INamedFunction, IEnvironment } from "./interpreter";
 import { Item, Types, NIL, TRUE, FALSE, createFunction, createString, createNumber, createList } from "./parser";
 import { RAW_NIL, RAW_TRUE, RAW_FALSE} from "./tokenizer";
 
@@ -43,7 +43,7 @@ export function itemsToString(items: Item[], prettyPrint = false): string {
 
 }
 
-export function createNamedFunction(name: string, call: (items: Item[]) => Item): INamedFunction {
+export function createNamedFunction(name: string, call: (items: Item[], env: IEnvironment) => Item): INamedFunction {
     return {
         name: name,
         function: createFunction(call)
@@ -68,7 +68,7 @@ export const ReadFunction: INamedFunction = createNamedFunction('read', (args: I
 });
 
 export const ConcatFunction: INamedFunction = createNamedFunction('concat', (args: Item[]): Item => {
-    if (!args || args.length < 1) throw "[concat] function needs to be called with at least one argument";
+    if (!args || args.length < 1) throw "[concat] function takes at least 1 argument";
     if (!args.reduce((acc, next) => acc && next.type == Types.STRING, true)) {
         throw "[concat] function needs to be called with arguments of type string";
     }
@@ -76,7 +76,7 @@ export const ConcatFunction: INamedFunction = createNamedFunction('concat', (arg
 });
 
 export const StrLenFunction: INamedFunction = createNamedFunction('strlen', (args: Item[]): Item => {
-    if (!args || args.length != 1 || args[0].type != Types.STRING) throw "[strlen] function requires 1 string argument";
+    if (!args || args.length != 1 || args[0].type != Types.STRING) throw "[strlen] function takes 1 string argument";
     return createNumber(String(args[0]["str"]).length);
 });
 
@@ -137,10 +137,12 @@ export const CarFunction: INamedFunction = createNamedFunction('car', (args: Ite
 });
 
 export const CdrFunction: INamedFunction = createNamedFunction('cdr', (args: Item[]): Item => {
-    if (!args) {
+    let arg = args[0];
+    if (!arg || args.length > 1 || arg.type != Types.LIST) {
         throw "[cdr] function takes 1 list argument";
     }
-    let [foo, ...ret] = args;
+    let [foo, ...ret] = arg.items;
+
     return createList(ret);
 });
 
@@ -157,6 +159,53 @@ export const ListFunction: INamedFunction = createNamedFunction('list', (args: I
         throw "[list] function takes 1 or more arguments";
     }
     return createList(args);
+});
+
+export const IsEmptyFunction: INamedFunction = createNamedFunction('empty?', (args: Item[], env: IEnvironment): Item => {
+    if (!args) return NIL;
+    let arg = args[0];
+
+    if (!arg || args.length > 1 || (arg.type != Types.STRING && arg.type != Types.LIST)) {
+        throw "[empty?] function takes 1 list or string argument";
+    }
+
+    if (arg.type == Types.STRING) {
+        return arg.str == ""? TRUE: FALSE;
+    }
+    if (arg.type == Types.LIST) {
+        return arg.items && arg.items.length > 0? FALSE: TRUE;
+    }
+
+});
+
+export const LenFunction: INamedFunction = createNamedFunction('len', (args: Item[], env: IEnvironment): Item => {
+    if (!args) return NIL;
+    let arg = args[0];
+
+    if (!arg || args.length > 1 || (arg.type != Types.STRING && arg.type != Types.LIST)) {
+        throw "[len] function takes 1 list or string argument";
+    }
+
+    if (arg.type == Types.STRING) {
+        return createNumber(arg.str.length);
+    }
+    if (arg.type == Types.LIST) {
+        return createNumber(arg.items.length);
+    }
+
+});
+
+export const StrToListFunction: INamedFunction = createNamedFunction('str->list', (args: Item[], env: IEnvironment): Item => {
+    if (!args) return NIL;
+    let arg = args[0];
+
+    if (!arg || args.length > 1 || arg.type != Types.STRING) {
+        throw "[str->list] function takes 1 string argument";
+    }
+
+    let chars = arg.str.split("");
+
+    return createList(chars.map(s => createString(s)));
 });
 
 export const LISP_FUNCTIONS = 
@@ -181,10 +230,19 @@ export const LISP_FUNCTIONS =
 
     (defn != (a b)
         (not (= a b)))
+
+;;    (defn len (lis) ;; FIXME: Why this function does not work??
+;;        (if (empty? lis) 
+;;            0
+;;            (+ 1 (len (cdr lis)))))
+
+    (defn strlen (s)
+       (len (str->list s)))
 `;
 
 export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, StrLenFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
     MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
+    StrToListFunction, IsEmptyFunction, LenFunction
 ];
