@@ -19,6 +19,5 @@
 (print "Basic Lisp REPL.")
 (print "Type Lisp code to be evaluated. To leave type 'exit'")
 (print "")
-;; (replw ">> ")
-(set! command (read "Hey!!! "))
+(replr ">> ")
 (print "Exiting...")
