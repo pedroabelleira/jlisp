@@ -1,0 +1,11 @@
+{
+    "name": "jlisp",
+    "version": "0.0.1_pre",
+    "dependencies": {
+        "readline": "1.3.0"
+    },
+    "scripts": {
+        "test": "cd dist/test && run node all_tests.js",
+        "run": "cd dist && run node jlisp.js"
+    }
+}

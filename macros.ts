@@ -188,18 +188,15 @@ export class DefMacroMacro implements IMacro {
     name = 'defmacro';
     expand = (args: Item[], env: IEnvironment): Item => {
         if (!args || args.length != 3 || !args[0]) throw "defmacro expects 3 arguments";
-        let [name, params, ...body] = args;
+        let [name, params, body] = args;
 
-        if (name.type != Types.VARIABLE) throw `defmacro: first argument must be a variable (line = ${name.line})`;
-        if (params.type != Types.LIST) throw `defmacro: second argument must be a list of symbols (line = ${params.line}`;
+        if (name.type != Types.VARIABLE) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
+        if (params.type != Types.LIST) throw `[defmacro] second argument must be a list of symbols (line = ${params.line}`;
         let pars = params; // Typescript compiler is not smart enough
         if (!params.items.reduce((acc, next) => acc && next.type == Types.VARIABLE, true)) {
-            throw `defmacro: second argument must be a list of symbols (line = ${params.line}`;
+            throw `[defmacro]: second argument must be a list of symbols (line = ${params.line}`;
         }
-
-        // console.log("Before expand macros body = " + itemsToString(body));
-        body = body.map(exp => expandMacros(exp, env));
-        // console.log("After expand macros body = " + itemsToString(body));
+        if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
 
         env.addMacro({
             name: name.name,
@@ -207,14 +204,21 @@ export class DefMacroMacro implements IMacro {
                 env = env.createNestedEnvironment();
 
                 pars.items.forEach((p, index) => {
-                    env.addVariable(p["name"], expandMacros(_args[index], env));
+                    // env.addVariable(p["name"], expandMacros(_args[index], env));
+                    env.addVariable(p["name"], _args[index]);
                 });
 
-                // console.log("Before evaluating defmacro body = " + itemsToString(body));
-                let ret = evalItem(createList(body), env);
-                // console.log("After evaluating defmacro ret = " + itemToString(ret));
+                console.log("Before expand macros body = " + itemToString(body));
+                body = expandMacros(expandMacros(body, env), env);
+                console.log("After expand macros body = " + itemToString(body));
+                // body = evalItem(body, env);
+                console.log("After evalItem body = " + itemToString(body));
+                return body;
 
-                return ret;
+                // console.log("[defmacro] runtime: before evaluating defmacro body = " + itemToString(body));
+                // let ret = evalItem(expandMacros(body, env), env);
+                // console.log("[defmacro] runtime: after evaluating defmacro ret = " + itemToString(ret));
+                // return ret;
             }
         });
 
@@ -271,9 +275,10 @@ export class SetBangMacro implements IMacro {
 
         let [variable, value] = args;
         if (variable.type != Types.VARIABLE) throw "[set!] macro: first argument must be a variable";
+        value = expandMacros(value, env);
 
         return createList([
-            createFunction((args: Item[]): Item => {
+            createFunction((args: Item[], env: IEnvironment): Item => {
                 try {
                     env.setVariable(variable["name"], evalItem(value, env));
                 } catch (ex) {
