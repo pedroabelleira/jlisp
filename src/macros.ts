@@ -11,7 +11,7 @@ export class BeginMacro implements IMacro {
         return createList([
             createFunction((items: Item[], env: IEnvironment): Item => {
                 let ret:Item = NIL;
-                while (args && items.length > 0) {
+                while (items && items.length > 0) {
                     let t = items.shift();
                     ret = evalItem(t, env);
                 }
@@ -35,16 +35,12 @@ export class IfMacro implements IMacro {
         return createList([
             createFunction((args: Item[], env: IEnvironment): Item => {
                 let ret;
-                // console.log("** If function: args = " + itemsToString([...args, trueBranch, elseBranch]));
                 if (args[0] == TRUE) {
-                    // console.log("** If function: evaluating true branch");
                     ret = evalItem(trueBranch, env);
                 } else {
-                    // console.log("** If function: evaluating false branch");
                     if (!elseBranch || elseBranch == NIL) return NIL;
                     ret = evalItem(elseBranch, env);
                 }
-                // console.log("** If function: returning = " + itemsToString(args));
                 return ret;
             }, cond.line, `<native if[${IfMacro.NUM_IFS++}]>`),
             cond
@@ -88,9 +84,7 @@ export class DefnMacro implements IMacro {
             args[2]
         ]));
 
-        // console.log("Defn: Before expanding return = " + itemsToString(items));
         let ret = expandMacros(createList(items), env);
-        // console.log("Defn: After expanding return = " + itemToString(ret));
 
         return NIL;
     }
@@ -98,7 +92,7 @@ export class DefnMacro implements IMacro {
 
 export class EvalMacro implements IMacro {
     name = 'eval';
-    expand = (args: Item[], env):Item => {
+    expand = (args: Item[], env: IEnvironment):Item => {
         let arg = args[0];
         if (!arg) throw "'eval' requires 1 argument";
         arg = expandMacros(arg, env);
@@ -175,7 +169,7 @@ export class DefineMacroMacro implements IMacro {
 
         env.addMacro({
             name: (<VariableType>args[0]).name,
-            expand: (_args: Item[]) => {
+            expand: (_args: Item[], env: IEnvironment) => {
                 return macro.expand(_args, env);
             }
         });
@@ -187,24 +181,23 @@ export class DefineMacroMacro implements IMacro {
 export class DefMacroMacro implements IMacro {
     name = 'defmacro';
     expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || args.length != 3 || !args[0]) throw "defmacro expects 3 arguments";
+        if (!args || args.length != 3 || !args[0]) throw "[defmacro] expects 3 arguments";
         let [name, params, body] = args;
 
         if (name.type != Types.VARIABLE) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
         if (params.type != Types.LIST) throw `[defmacro] second argument must be a list of symbols (line = ${params.line}`;
         let pars = params; // Typescript compiler is not smart enough
         if (!params.items.reduce((acc, next) => acc && next.type == Types.VARIABLE, true)) {
-            throw `[defmacro]: second argument must be a list of symbols (line = ${params.line}`;
+            throw `[defmacro]: second argument must be a list of variables (line = ${params.line}`;
         }
         if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
 
         env.addMacro({
             name: name.name,
-            expand: (_args: Item[]) => {
+            expand: (_args: Item[], env: IEnvironment) => {
                 env = env.createNestedEnvironment();
 
                 pars.items.forEach((p, index) => {
-                    // env.addVariable(p["name"], expandMacros(_args[index], env));
                     env.addVariable(p["name"], _args[index]);
                 });
 
@@ -214,11 +207,6 @@ export class DefMacroMacro implements IMacro {
                 // body = evalItem(body, env);
                 console.log("After evalItem body = " + itemToString(body));
                 return body;
-
-                // console.log("[defmacro] runtime: before evaluating defmacro body = " + itemToString(body));
-                // let ret = evalItem(expandMacros(body, env), env);
-                // console.log("[defmacro] runtime: after evaluating defmacro ret = " + itemToString(ret));
-                // return ret;
             }
         });
 
@@ -325,7 +313,7 @@ export class UnquoteMacro implements IMacro {
 
 export class ReadStringMacro implements IMacro {
     name = 'read-string';
-    expand = (args: Item[], env) => {
+    expand = (args: Item[], env: IEnvironment) => {
         let arg = args[0];
         if (!arg) throw "'read-string' requires 1 string argument";
 
@@ -355,8 +343,7 @@ export class ReadStringMacro implements IMacro {
 
 export const NATIVE_MACROS = [
     DefineMacro, IfMacro, EvalMacro, LambdaMacro, DefnMacro, BeginMacro,
-    WhileMacro, BreakMacro, SetBangMacro, /*StrToListMacro,*/
-    QuoteMacro, UnquoteMacro,
+    WhileMacro, BreakMacro, SetBangMacro, QuoteMacro, UnquoteMacro,
     DefineMacroMacro, ReadStringMacro, DefMacroMacro
 ];
 
