@@ -1,0 +1,4 @@
+- Add &rest argument to functions, so they can deal with variable number of arguments
+- Implement the 'defmacro' macro
+- Remove the 'define-macro' macro (or make it an alias for 'defmacro')
+- Add quotes ("'" "`" "," and ",@") to parser in order to make macros easier to write
