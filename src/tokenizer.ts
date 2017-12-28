@@ -1,5 +1,6 @@
-export enum RawTokens { OPEN_PARENS, CLOSE_PARENS, QUOTE, BACKQUOTE, UNQUOTE, UNQUOTE_AT, 
-                        SYMBOL, STRING, NUMBER, BOOLEAN, NIL, COMMENT }
+export enum RawTokens { OPEN_PARENS = '(', CLOSE_PARENS = ')', QUOTE = "'", BACKQUOTE = '`', 
+                        UNQUOTE = ',', UNQUOTE_AT = ',@', SYMBOL = 'SYMBOL', STRING = 'STRING', 
+                        NUMBER = 'NUMBER', BOOLEAN = 'BOOLEAN', NIL = 'NIL', COMMENT = 'COMMENT' }
 
 export interface BaseRawToken { type: RawTokens, val?: string, line?: number }
 export interface RawSymbolToken extends BaseRawToken { type: RawTokens.SYMBOL, val: string }

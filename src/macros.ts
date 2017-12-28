@@ -1,4 +1,4 @@
-import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createVariable, createList, FunctionType, createString, ListType } from "./parser";
+import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createSymbol, createList, FunctionType, createString, ListType } from "./parser";
 import { IMacro, IEnvironment, evalItem, INamedFunction, expandMacros } from "./interpreter";
 import { debug } from "./debug";
 import { itemToString, createNamedFunction, itemsToString } from "./functions";
@@ -61,10 +61,10 @@ export class DefnMacro implements IMacro {
         let line = args[0].line;
         let items = [];
 
-        items.push(createVariable('define', line));
-        items.push(createVariable((<VariableType>args[0]).name, line));
+        items.push(createSymbol('define', line));
+        items.push(createSymbol((<VariableType>args[0]).name, line));
         items.push(createList([
-            createVariable('lambda'),
+            createSymbol('lambda'),
             args[1],
             args[2]
         ]));
@@ -184,7 +184,7 @@ export class DefMacroMacro implements IMacro {
                 if (pars && pars.length > 0) {
                     pars.forEach((par, index) => {
                         let value: Item = _args? _args[index]: NIL;
-                        value = createList([createVariable(QuoteMacro.QUOTE_MACRO_NAME), value]);
+                        value = createList([createSymbol(QuoteMacro.QUOTE_MACRO_NAME), value]);
                         newEnv.addVariable(par.name, value); // We quote to protect from evaluation
                     });
                 }

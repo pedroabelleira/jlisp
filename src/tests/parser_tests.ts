@@ -19,6 +19,18 @@ let progs = [
 
 progs.forEach(p => assertEquals(() => itemToString(parse(p)[0]), p));
 
+assertEquals(() => { return itemToString(parse(`
+    ('print)
+`)[0])}, "((quote print))", 'Quotes 1');
+
+assertEquals(() => { return itemToString(parse(`
+    '(print)
+`)[0])}, "(quote (print))", 'Quotes 2');
+
+assertEquals(() => { return itemToString(parse(`
+    \`(set! ,a ,@items)
+`)[0])}, "(quasiquote (set! (unquote a) (unquote-at items)))", 'Quotes 3');
+
 });}
 
 declare var module
