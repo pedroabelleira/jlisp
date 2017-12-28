@@ -175,22 +175,19 @@ export class DefMacroMacro implements IMacro {
         if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
 
         let pars: VariableType[] = <VariableType[]> params.items;
-        // console.log(`[defmacro] original macro expand phase: before evaluating body, body = '${itemToString(body)}'`);
-        // body = expandMacros(body, env);
-        // console.log(`[defmacro] original macro expand phase: after evaluating body, body = '${itemToString(body)}'`);
         
         env.addMacro({
             name: name.name,
             expand: (_args: Item[], env: IEnvironment) => {
-                console.log(`[defmacro] generated macro expand phase: before var replacement, body = '${itemToString(body)}'`);
+                // console.log(`[defmacro] generated macro expand phase: before var replacement, body = '${itemToString(body)}'`);
                 pars.forEach((p, index) => {
                     body = this.replaceVarByValue(p, _args[index], <ListType> body);
                 });
-                console.log(`[defmacro] generated macro expand phase: before expanding body, body = '${itemToString(body)}'`);
+                // console.log(`[defmacro] generated macro expand phase: before expanding body, body = '${itemToString(body)}'`);
+                body = expandMacros(body, env);
                 body = expandMacros(body, env);
 
-
-                console.log(`[defmacro] generated macro expand phase: after evaluating body, body = '${itemToString(body)}'`);
+                // console.log(`[defmacro] generated macro expand phase: after evaluating body, body = '${itemToString(body)}'`);
                 return body;
             }
         });
@@ -202,7 +199,7 @@ export class DefMacroMacro implements IMacro {
         let mf = list.items[0];
         // We don't enter quoted sections
         // FIXME adapt code for quasiquotes / unquote 
-        if (!mf || (mf.type == Types.VARIABLE) && mf.name == 'quote') { 
+        if (!mf || (mf.type == Types.VARIABLE) && mf.name == QuoteMacro.QUOTE_MACRO_NAME) { 
             return list;
         }
         return createList(list.items.map(it => {
@@ -284,7 +281,9 @@ export class SetBangMacro implements IMacro {
 }
 
 export class QuoteMacro implements IMacro {
-    name = 'quote';
+    static QUOTE_MACRO_NAME = 'quote';
+
+    name = QuoteMacro.QUOTE_MACRO_NAME;
     expand = (args: Item[], env: IEnvironment): Item => {
         if (!args || args.length == 0 || args.length > 1) {
             throw "'quote' takes exactly 1 argument";

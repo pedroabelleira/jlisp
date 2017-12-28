@@ -6,7 +6,7 @@ import { RAW_NIL, RAW_TRUE, RAW_FALSE } from "../tokenizer";
 
 export const MACRO_TESTS: () => void = () => { runSuite(() => {
 
-/*
+//*
 assertRun('(define val 2)', "");
 assertRun('(define val 2) (+ val 1)', 3);
 assertRun('(define val (+ 1 1)) (+ val 1)', 3);
@@ -158,7 +158,6 @@ assertRun(`
 assertRun(`
     ;;; Check that defmacro allows for basic macros with 1 argument 
     (defmacro nil! (variable)
-        ;;((quote set!) variable 3)
         (list (quote set!) variable 3)
     )
     (define a 10)

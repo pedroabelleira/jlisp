@@ -18,9 +18,9 @@ export function runWithoutIncludes(program: string): string {
 function runParsed(program: Item[]): string {
     let env:IEnvironment = new Environment(); 
 
-    console.log(`[Program] Call to expand macros: \nBefore expansion: \n\n${itemsToString(program)}\n\n`);
+    // console.log(`[Program] Call to expand macros: \nBefore expansion: \n\n${itemsToString(program)}\n\n`);
     program = program.map(it => expandMacros(it, env)).filter(it => it && it != NIL); // First we expand macros
-    console.log(`[Program] Call to expand macros: \nAfter expansion: \n\n${itemsToString(program)}\n\n`);
+    // console.log(`[Program] Call to expand macros: \nAfter expansion: \n\n${itemsToString(program)}\n\n`);
     return program.reduce((acc, next) => itemToString (evalItem(next, env)), "");
 }
 
