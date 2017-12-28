@@ -153,7 +153,6 @@ assertRun(`
 `, "3");
 
 
-// */
 
 assertRun(`
     ;;; Check that defmacro allows for basic macros with 1 argument 
@@ -165,9 +164,51 @@ assertRun(`
     (+ a 0)
 `, 3);
 
+
+assertRun(`
+    ;;; Check that defmacro allows for less trivial macros 
+    (defmacro defn2 (name a b body)
+        (list (quote define) name 
+            (list (quote lambda)
+                (list a b) 
+                body
+            )
+        )
+    )
+    (defn2 sum a b (+ a b))
+    (sum 2 2)
+`, 4);
+
+// */
+//*/
+
+assertRun(`
+    ;;; Check that defmacro allows for less trivial macros 
+    (defmacro defn3 (name vars body)
+        (list (quote define) name 
+            (list (quote lambda)
+                vars 
+                body
+            )
+        )
+    )
+    (defn3 sum (a b) (+ a b))
+    (sum 2 2)
+`, 4);
+// */
 ///////////////////////////////////////////////////////////////////////
 // These don't work yet
 ///////////////////////////////////////////////////////////////////////
+
+// assertRun(`
+//     ;;; Check that defmacro allows for basic macros with quote syntax 
+//     (defmacro nil! (variable)
+//         \`(set! ,variable 3)
+//     )
+//     (define a 10)
+//     (nil! a)
+//     (+ a 0)
+// `, 3);
 
 
 // assertRunError(`

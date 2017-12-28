@@ -188,13 +188,13 @@ export class DefMacroMacro implements IMacro {
                         newEnv.addVariable(par.name, value); // We quote to protect from evaluation
                     });
                 }
-                // console.log(`[defmacro] generated macro expand phase: [1], body = '${itemToString(body)}'`);
+                console.log(`[defmacro] generated macro expand phase: [1], body = '${itemToString(body)}'`);
                 body = evalItem(body, newEnv);
-                // console.log(`[defmacro] generated macro expand phase: [2], body = '${itemToString(body)}'`);
+                console.log(`[defmacro] generated macro expand phase: [2], body = '${itemToString(body)}'`);
                 body = expandMacros(body, env);
-                // console.log(`[defmacro] generated macro expand phase: [3], body = '${itemToString(body)}'`);
+                console.log(`[defmacro] generated macro expand phase: [3], body = '${itemToString(body)}'`);
                 body = expandMacros(body, env);
-                // console.log(`[defmacro] generated macro expand phase: [4], body = '${itemToString(body)}'`);
+                console.log(`[defmacro] generated macro expand phase: [4], body = '${itemToString(body)}'`);
 
                 return body;
             }
@@ -342,4 +342,13 @@ export const NATIVE_MACROS = [
 export const LISP_MACROS = 
 `   (define-macro def define)
     (define-macro fn lambda)
+
+    (defmacro defun (name vars body)
+        (list (quote define) name 
+            (list (quote lambda)
+                vars 
+                body
+            )
+        )
+    )
 `;
