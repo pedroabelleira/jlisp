@@ -8,13 +8,13 @@ export enum Types {
     NUMBER = 'NUMBER', 
     BOOLEAN = 'BOOLEAN', 
     STRING = 'STRING', 
-    VARIABLE = 'VARIABLE', 
+    SYMBOL = 'SYMBOL', 
     FUNCTION = 'FUNCTION', 
     LIST = 'LIST', 
     NIL = 'NIL' 
 }
 interface BaseToken { type: Types, line?: number }
-export interface VariableType extends BaseToken { type: Types.VARIABLE, name: string }
+export interface VariableType extends BaseToken { type: Types.SYMBOL, name: string }
 export interface NumberType extends BaseToken { type: Types.NUMBER, num: number }
 export interface StringType extends BaseToken { type: Types.STRING, str: string }
 export interface BooleanType extends BaseToken { type: Types.BOOLEAN, cond: boolean }
@@ -33,7 +33,7 @@ export type Item = Atom | ListType;
 
 export function createString(str: string, line:number = 0): StringType {return { type: Types.STRING, str: str, line: line }}
 export function createNumber(num: number, line:number = 0): NumberType {return { type: Types.NUMBER, num: num, line: line }}
-export function createVariable(name: string, line:number = 0): VariableType {return { type: Types.VARIABLE, name: name, line: line }}
+export function createVariable(name: string, line:number = 0): VariableType {return { type: Types.SYMBOL, name: name, line: line }}
 export function createFunction(call: (args: Item[], env: IEnvironment) => Item, line = 0, id?: string, description?: string): FunctionType {
     return { type: Types.FUNCTION, call: call, line: line, id: id, description: description }
 };

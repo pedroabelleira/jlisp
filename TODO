@@ -5,3 +5,4 @@
 - Add quotes ("'" "`" "," and ",@") to parser in order to make macros easier to write
 - Anything in the list at the bottom of README.md
 - Implement 'let'
+- Fix report and number lines: number lines are not being used consistently over the code

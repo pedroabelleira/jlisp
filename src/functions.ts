@@ -19,7 +19,7 @@ export function itemToString(item: Item, prettyPrint = false): string {
             } else {
                 return '#Function<native>';
             }
-        case Types.VARIABLE: return item.name;
+        case Types.SYMBOL: return item.name;
         case Types.LIST:
             return item.items.reduce((acc, next, index) => {
                 if (index != 0) {

@@ -42,7 +42,7 @@ export function evalItem(item: Item, env: IEnvironment): Item {
         case Types.NIL:
             ret = item;
             break;
-        case Types.VARIABLE:
+        case Types.SYMBOL:
             let variable = evalItem(env.findVariable(item.name), env);
             if (!variable) throw `Interpreter error: symbol '${item.name}' not found (line ${item.line})`;
             ret = evalItem(variable, env);
@@ -51,7 +51,7 @@ export function evalItem(item: Item, env: IEnvironment): Item {
             trace = true;
             // console.log("Evaluating list. List items: " + itemToString(item) + "\n");
             let [macro, ...foo] = item.items;
-            if (macro.type == Types.VARIABLE) {
+            if (macro.type == Types.SYMBOL) {
                 if (env.findMacro(macro.name)) {
                     return item; // If there is a macro, then we are in an expanding phase and we leave 
                                  // macros as they are. Hopefully somebody will expand them later...
@@ -98,14 +98,14 @@ export function _expandMacros(item: Item, env: IEnvironment): Item {
 
     let macro: IMacro;
     switch (item.type) {
-        case Types.NUMBER: case Types.STRING: case Types.VARIABLE: case Types.FUNCTION: case Types.BOOLEAN: case Types.NIL:
+        case Types.NUMBER: case Types.STRING: case Types.SYMBOL: case Types.FUNCTION: case Types.BOOLEAN: case Types.NIL:
             return item;
         case Types.LIST:
             if (!item || !item.items || item.items.length == 0) return NIL;
             item.items = item.items.filter(t => t && t.type != Types.NIL);
             let [macro, ...args] = item.items;
             if (!macro) return NIL; // Empty list 
-            if (macro.type != Types.VARIABLE) {
+            if (macro.type != Types.SYMBOL) {
                 item.items = item.items.map(it => expandMacros(it, env));
                 return item; // We only need to expand symbols, so we are done
             }

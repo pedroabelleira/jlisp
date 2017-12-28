@@ -45,7 +45,7 @@ export class DefineMacro implements IMacro {
         let name = args[0];
         let value = args[1];
 
-        if (!name && name.type != Types.VARIABLE) {
+        if (!name && name.type != Types.SYMBOL) {
             throw `[define] macro takes two arguments, the first of which must be a variable name (line = ${name.line}`;
         } 
         value = evalItem(expandMacros(value, env), env);
@@ -111,7 +111,7 @@ export class LambdaMacro implements IMacro {
             throw "[lambda] Function macro error: first argument must be a list of parameters";
         }
 
-        if (params.items.filter(t => !!t).filter(t => t.type != Types.VARIABLE).length != 0) {
+        if (params.items.filter(t => !!t).filter(t => t.type != Types.SYMBOL).length != 0) {
             throw "[lambda] Function macro error: function parameters must be variable names: ";  
         }
 
@@ -141,7 +141,7 @@ export class DefineMacroMacro implements IMacro {
     name = 'define-macro';
     expand = (args: Item[], env: IEnvironment): Item => {
         if (!args || args.length != 2 || !args[0]) throw "define-macro expects 2 arguments";
-        if (args[0].type != Types.VARIABLE) {
+        if (args[0].type != Types.SYMBOL) {
             throw `define-macro: first argument must be a variable name (line = ${args[0].line})`;
         }
         let nameMacro = (<VariableType>args[1]).name;
@@ -167,9 +167,9 @@ export class DefMacroMacro implements IMacro {
         if (!args || args.length != 3 || !args[0]) throw "[defmacro] expects 3 arguments";
         let [name, params, body] = args;
 
-        if (name.type != Types.VARIABLE) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
+        if (name.type != Types.SYMBOL) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
         if (params.type != Types.LIST) throw `[defmacro] second argument must be a list of symbols (line = ${params.line}`;
-        if (!params.items.reduce((acc, next) => acc && next.type == Types.VARIABLE, true)) {
+        if (!params.items.reduce((acc, next) => acc && next.type == Types.SYMBOL, true)) {
             throw `[defmacro]: second argument must be a list of variables (line = ${params.line}`;
         }
         if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
@@ -249,7 +249,7 @@ export class SetBangMacro implements IMacro {
         if (!args || args.length != 2) throw "[set!] macro takes two arguments";
 
         let [variable, value] = args;
-        if (variable.type != Types.VARIABLE) throw "[set!] macro: first argument must be a variable";
+        if (variable.type != Types.SYMBOL) throw "[set!] macro: first argument must be a variable";
         value = expandMacros(value, env);
 
         return createList([
@@ -315,7 +315,7 @@ export class ReadStringMacro implements IMacro {
                 case Types.LIST:
                 case Types.NUMBER:
                 case Types.BOOLEAN:
-                case Types.VARIABLE:
+                case Types.SYMBOL:
                     arg = evalItem(arg, env);
                     if (!arg || arg.type != Types.STRING) return arg;
                     // Intented passthrough
