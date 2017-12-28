@@ -50,6 +50,14 @@ export function evalItem(item: Item, env: IEnvironment): Item {
         case Types.LIST:
             trace = true;
             // console.log("Evaluating list. List items: " + itemToString(item) + "\n");
+            let [macro, ...foo] = item.items;
+            if (macro.type == Types.VARIABLE) {
+                if (env.findMacro(macro.name)) {
+                    return item; // If there is a macro, then we are in an expanding phase and we leave 
+                                 // macros as they are. Hopefully somebody will expand them later...
+                                 // In particular, this prevents us into entring 'quote'd expressions
+                }
+            }
             let [func, ...args] = item.items.map(it => evalItem(it, env));
 
             if (func.type != Types.FUNCTION) {
@@ -93,7 +101,7 @@ export function _expandMacros(item: Item, env: IEnvironment): Item {
         case Types.NUMBER: case Types.STRING: case Types.VARIABLE: case Types.FUNCTION: case Types.BOOLEAN: case Types.NIL:
             return item;
         case Types.LIST:
-            if (!item || !item.items) return NIL;
+            if (!item || !item.items || item.items.length == 0) return NIL;
             item.items = item.items.filter(t => t && t.type != Types.NIL);
             let [macro, ...args] = item.items;
             if (!macro) return NIL; // Empty list 
