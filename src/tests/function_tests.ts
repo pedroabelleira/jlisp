@@ -95,6 +95,17 @@ assertRun(`
 `, '0');
 
 assertRun(`
+    ;;; Checks that recursivity works for big enough levels 
+    (define prod
+        (lambda (n b)
+            (if (= n 0) 0
+	            (if (< n 0) (- 0 (prod (- 0 n) b ))
+		            (+ b (prod (- n 1) b))))))
+
+    (prod 200 4)
+`, 800);
+
+assertRun(`
     ;;; Checks that strlen works
     (strlen "Hello")
 `, 5);

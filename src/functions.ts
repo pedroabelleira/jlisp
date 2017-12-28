@@ -154,13 +154,6 @@ export const ConsFunction: INamedFunction = createNamedFunction('cons', (args: I
     return createList([first, ...ret]);
 });
 
-export const ListFunction: INamedFunction = createNamedFunction('list', (args: Item[]): Item => {
-    if (!args) {
-        throw "[list] function takes 1 or more arguments";
-    }
-    return createList(args);
-});
-
 export const IsEmptyFunction: INamedFunction = createNamedFunction('empty?', (args: Item[], env: IEnvironment): Item => {
     if (!args) return NIL;
     let arg = args[0];
@@ -243,6 +236,6 @@ export const LISP_FUNCTIONS =
 export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, StrLenFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
-    MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
+    MinorThanFunction, CdrFunction, CarFunction, ConsFunction, 
     StrToListFunction, IsEmptyFunction, LenFunction
 ];

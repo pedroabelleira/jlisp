@@ -1,4 +1,4 @@
-import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createVariable, createList, FunctionType, createString } from "./parser";
+import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createVariable, createList, FunctionType, createString, ListType } from "./parser";
 import { IMacro, IEnvironment, evalItem, INamedFunction, expandMacros } from "./interpreter";
 import { debug } from "./debug";
 import { itemToString, createNamedFunction, itemsToString } from "./functions";
@@ -169,31 +169,55 @@ export class DefMacroMacro implements IMacro {
 
         if (name.type != Types.VARIABLE) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
         if (params.type != Types.LIST) throw `[defmacro] second argument must be a list of symbols (line = ${params.line}`;
-        let pars = params; // Typescript compiler is not smart enough
         if (!params.items.reduce((acc, next) => acc && next.type == Types.VARIABLE, true)) {
             throw `[defmacro]: second argument must be a list of variables (line = ${params.line}`;
         }
         if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
 
+        let pars: VariableType[] = <VariableType[]> params.items;
+        // console.log(`[defmacro] original macro expand phase: before evaluating body, body = '${itemToString(body)}'`);
+        // body = expandMacros(body, env);
+        // console.log(`[defmacro] original macro expand phase: after evaluating body, body = '${itemToString(body)}'`);
+        
         env.addMacro({
             name: name.name,
             expand: (_args: Item[], env: IEnvironment) => {
-                env = env.createNestedEnvironment();
-
-                pars.items.forEach((p, index) => {
-                    env.addVariable(p["name"], _args[index]);
+                console.log(`[defmacro] generated macro expand phase: before var replacement, body = '${itemToString(body)}'`);
+                pars.forEach((p, index) => {
+                    body = this.replaceVarByValue(p, _args[index], <ListType> body);
                 });
+                console.log(`[defmacro] generated macro expand phase: before expanding body, body = '${itemToString(body)}'`);
+                body = expandMacros(body, env);
 
-                console.log("Before expand macros body = " + itemToString(body));
-                body = expandMacros(expandMacros(body, env), env);
-                console.log("After expand macros body = " + itemToString(body));
-                // body = evalItem(body, env);
-                console.log("After evalItem body = " + itemToString(body));
+
+                console.log(`[defmacro] generated macro expand phase: after evaluating body, body = '${itemToString(body)}'`);
                 return body;
             }
         });
 
         return NIL;
+    }
+
+    private replaceVarByValue(varr: VariableType, value: Item, list: ListType): ListType {
+        let mf = list.items[0];
+        // We don't enter quoted sections
+        // FIXME adapt code for quasiquotes / unquote 
+        if (!mf || (mf.type == Types.VARIABLE) && mf.name == 'quote') { 
+            return list;
+        }
+        return createList(list.items.map(it => {
+            switch (it.type) {
+                case Types.BOOLEAN: case Types.FUNCTION: case Types.NIL: case Types.NUMBER: case Types.STRING:
+                    return it;
+                case Types.VARIABLE:
+                    if (it.name == varr.name) {
+                        return value;
+                    }
+                    return it;
+                case Types.LIST:
+                    return this.replaceVarByValue(varr, value, it);
+            }
+        }));
     }
 }
 
@@ -217,9 +241,7 @@ export class WhileMacro implements IMacro {
                 });
             }
             return NIL;
-        }),
-            // cond
-        ]);
+        }), ]);
 
         return ret;
     }
@@ -269,6 +291,13 @@ export class QuoteMacro implements IMacro {
         }
 
         return args[0];
+    }
+}
+
+export class ListMacro implements IMacro {
+    name = 'list';
+    expand = (args: Item[], env: IEnvironment): Item => {
+        return createList(args.map(a => expandMacros(a, env)));
     }
 }
 
@@ -329,7 +358,7 @@ export class ReadStringMacro implements IMacro {
 export const NATIVE_MACROS = [
     DefineMacro, IfMacro, EvalMacro, LambdaMacro, DefnMacro, BeginMacro,
     WhileMacro, BreakMacro, SetBangMacro, QuoteMacro, UnquoteMacro,
-    DefineMacroMacro, ReadStringMacro, DefMacroMacro
+    DefineMacroMacro, ReadStringMacro, DefMacroMacro, ListMacro
 ];
 
 export const LISP_MACROS = 

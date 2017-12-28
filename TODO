@@ -1,3 +1,5 @@
+- Fix QuasiQuoteMacro (it's not implemented yet)
+- More tests for while (check side effects and break)
 - Implement the 'defmacro' macro
 - Remove the 'define-macro' macro (or make it an alias for 'defmacro')
 - Add quotes ("'" "`" "," and ",@") to parser in order to make macros easier to write
