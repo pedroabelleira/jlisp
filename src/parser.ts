@@ -92,7 +92,7 @@ function mapRawTokenToItem(rt: RawToken): Item {
     switch (rt.type) {
         case RawTokens.NUMBER: return createNumber(Number(rt.val)); // FIXME: handle incorrect formats
         case RawTokens.STRING: return createString(rt.val, rt.line);
-        case RawTokens.VARIABLE: return createVariable(rt.val, rt.line);
+        case RawTokens.SYMBOL: return createVariable(rt.val, rt.line);
         case RawTokens.BOOLEAN: return rt.val == RAW_TRUE? TRUE: FALSE;
         case RawTokens.NIL: return NIL; 
     }

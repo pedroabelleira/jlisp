@@ -1,14 +1,21 @@
-export enum RawTokens { OPEN_PARENS, CLOSE_PARENS, VARIABLE, STRING, NUMBER, BOOLEAN, NIL, COMMENT }
+export enum RawTokens { OPEN_PARENS, CLOSE_PARENS, QUOTE, BACKQUOTE, UNQUOTE, UNQUOTE_AT, 
+                        SYMBOL, STRING, NUMBER, BOOLEAN, NIL, COMMENT }
 
 export interface BaseRawToken { type: RawTokens, val?: string, line?: number }
-export interface RawSymbolToken extends BaseRawToken { type: RawTokens.VARIABLE, val: string }
+export interface RawSymbolToken extends BaseRawToken { type: RawTokens.SYMBOL, val: string }
 export interface RawNumberToken extends BaseRawToken { type: RawTokens.NUMBER, val: string }
 export interface RawStringToken extends BaseRawToken { type: RawTokens.STRING, val: string }
 export interface RawOpenParensToken extends BaseRawToken { type: RawTokens.OPEN_PARENS; }
 export interface RawCloseParensToken extends BaseRawToken { type: RawTokens.CLOSE_PARENS; }
+export interface RawQuoteToken extends BaseRawToken { type: RawTokens.QUOTE }
+export interface RawBackquoteToken extends BaseRawToken { type: RawTokens.BACKQUOTE}
+export interface RawUnquoteToken extends BaseRawToken { type: RawTokens.UNQUOTE}
+export interface RawUnquoteAtToken extends BaseRawToken { type: RawTokens.UNQUOTE_AT}
 export interface RawBooleanToken extends BaseRawToken { type: RawTokens.BOOLEAN; val: string }
 export interface RawNilToken extends BaseRawToken { type: RawTokens.NIL; val: string }
-export type RawToken = RawSymbolToken | RawNumberToken | RawStringToken | RawOpenParensToken | RawCloseParensToken | RawBooleanToken | RawNilToken;
+export type RawToken = RawSymbolToken | RawNumberToken | RawStringToken | RawOpenParensToken | 
+                       RawCloseParensToken | RawBooleanToken | RawNilToken |
+                       RawQuoteToken | RawBackquoteToken | RawUnquoteToken | RawUnquoteAtToken;
 export const RAW_TRUE = 'true';
 export const RAW_FALSE = 'false';
 export const RAW_NIL = 'nil';
@@ -44,6 +51,27 @@ export function tokenize(input: string): RawToken[] {
 
         if (isCloseParens(c)) {
             pushToken(tokens, {type: RawTokens.CLOSE_PARENS}); 
+            continue;
+        }
+
+        if (isQuote(c)) {
+            pushToken(tokens, {type: RawTokens.QUOTE}); 
+            continue;
+        }
+
+        if (isBackQuote(c)) {
+            pushToken(tokens, {type: RawTokens.BACKQUOTE}); 
+            continue;
+        }
+
+        if (isUnquote(c)) {
+            let nc = chars.shift();
+            if (nc == '@') {
+                pushToken(tokens, {type: RawTokens.UNQUOTE_AT}); 
+                continue;
+            }
+            chars.unshift(nc);
+            pushToken(tokens, {type: RawTokens.UNQUOTE}); 
             continue;
         }
 
@@ -91,6 +119,18 @@ function isOpenParens(car: string) {
 
 function isCloseParens(car: string) {
     return car == ')';
+}
+
+function isQuote(car: string) {
+    return car == "'";
+}
+
+function isBackQuote(car: string) {
+    return car == "`";
+}
+
+function isUnquote(car: string) {
+    return car == ",";
 }
 
 function readNumber(ic: string, chars: string[]): RawToken {
@@ -141,7 +181,7 @@ function readSymbol(ic: string, chars: string[]): RawToken {
             if (ic == RAW_TRUE) {return {type: RawTokens.BOOLEAN, val: RAW_TRUE}}
             if (ic == RAW_FALSE) {return {type: RawTokens.BOOLEAN, val: RAW_FALSE}}
             if (ic == RAW_NIL) {return {type: RawTokens.NIL, val: RAW_NIL}}
-            return {type: RawTokens.VARIABLE, val: ic, line: line};
+            return {type: RawTokens.SYMBOL, val: ic, line: line};
         }
 
         ic = ic + c;
@@ -152,7 +192,7 @@ export function tokenToString(token: RawToken) {
     switch(token.type) {
         case RawTokens.STRING: 
         case RawTokens.NUMBER: 
-        case RawTokens.VARIABLE:
+        case RawTokens.SYMBOL:
             return token.val;
         case RawTokens.OPEN_PARENS: return "(";
         case RawTokens.CLOSE_PARENS: return ")";

@@ -10,6 +10,11 @@ export const TOKENIZER_TESTS: () => void = () => { runSuite(() => {
 assertEquals(() => tokenize("(= 1 1)").length, 5);
 assertEquals(() => tokenToString(tokenize("(= 1 1)")[3]), 1);
 assertEquals(() => tokenToString(tokenize("(= 1 1)")[1]), '=');
+assertEquals(() => tokenize("'(= 1 1)").length, 6);
+assertEquals(() => tokenize("(= '1 1)").length, 6);
+assertEquals(() => tokenize("(= `1 1)").length, 6);
+assertEquals(() => tokenize("(= `1 ,1)").length, 7);
+assertEquals(() => tokenize("(= `1 ,@1)").length, 7);
 
 });}
 
