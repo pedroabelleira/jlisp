@@ -23,7 +23,7 @@ npm run full
 ```
 
 That will install dependencies, compile the source code, run the tests and, last, run the
-(not yet working) REPL.
+(extremally basic) REPL.
 
 Of course, you don't want to wait for the installation and compilation each time you change
 something, so 'tsc -w' is your friend and then you can use the normal npm commands:
@@ -39,7 +39,8 @@ that would be useful to do.
 
 ## Implementation
 The tokenizer and parser are contained in the files ./tokenizer.ts and ./parser.ts. Being Lisp the syntaxless language
-that it is, those two components are very trivial.
+that it is, those two components are quite trivial. The parser has support for quoting, which makes it slightly
+less trivial than it should otherwise.
 
 The interpreter is located in the file ./interpreter. It is very minimalistic. 
 It only knows how to load and run macros and intepret existing code. There are no
@@ -49,7 +50,7 @@ and ./macros.ts. As such, the interpreter and macro expander is also quite trivi
 The small number of functions already implemented are contained in the file ./functions.ts. There are some
 functions implemented as native (Typescript) code and a few more implemented in Lisp itself.
 
-Most of the less trivial code is located in ./macros.ts. There there are the fundamental macros 
+Most of the less simple code is located in ./macros.ts. There there are the fundamental macros 
 'if', 'lambda' (also called 'fn'), 'define', 'defn', 'eval', ... The interpreter simply loads those macros in the
 runtime at the start, but they are not special. They can even be replaced by user code by simply defining new
 macros with the same names.
@@ -63,14 +64,18 @@ Note that all the values are strongly typed at runtime. You can check the types 
 ## What next
 ### Big things
 #### Defmacro
-That's the most important addition: being able to define macros in Lisp itself. It shouldn't be too
-hard, but these things are tricky to implement. 
+That's the most important addition: being able to define macros in Lisp itself. It is already (partially?) 
+implemented, but it must be checked that it supports non trivial case and that the new quote support
+works as it should.
 
 #### Object System
-If defmacro works, I'd like to implement a simple object system on top of the language. The idea would be to allow
-values to have a class and then adding some syntactic shortcuts to make it look more like an object oriented language.
+Once defmacro works, I'd like to implement a simple object system on top of the language. Nothing as fancy as the
+object system in Common Lisp, but something simpler. The goal is to explore how much I can implement in
+pure Lisp code, without support from the interpreter 
+The idea is to allow values to have a class and then add some syntactic shortcuts to make it look more 
+like an object oriented language.
 
-For example
+For example:
 
 ```lisp
 (class Person
