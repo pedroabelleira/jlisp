@@ -48,9 +48,11 @@ export class DefineMacro implements IMacro {
         if (!name && name.type != Types.SYMBOL) {
             throw `[define] macro takes two arguments, the first of which must be a variable name (line = ${name.line}`;
         } 
-        value = evalItem(expandMacros(value, env), env);
-        env.addVariable(name["name"], value);
-        return NIL;
+        value = expandMacros(value, env);
+        return createList([ createFunction((args: Item[], env: IEnvironment) => {
+            env.addVariable(name["name"], args[0]);
+            return args[0];
+        }), value]);
     }
 }
 
@@ -70,8 +72,7 @@ export class DefnMacro implements IMacro {
         ]));
 
         let ret = expandMacros(createList(items), env);
-
-        return NIL;
+        return ret;
     }
 }
 
@@ -189,11 +190,11 @@ export class DefMacroMacro implements IMacro {
                     });
                 }
                 // console.log(`[defmacro] generated macro expand phase: [1], body = '${itemToString(body)}'`);
-                body = evalItem(body, newEnv);
+                body = evalItem(body, newEnv); // Evaluate the body to produce the macro
                 // console.log(`[defmacro] generated macro expand phase: [2], body = '${itemToString(body)}'`);
-                body = expandMacros(body, env);
+                body = expandMacros(body, env); // Expand the macros on the resulting macro 
                 // console.log(`[defmacro] generated macro expand phase: [3], body = '${itemToString(body)}'`);
-                body = expandMacros(body, env);
+                body = expandMacros(body, env); // And fially, apply the macro itself 
                 // console.log(`[defmacro] generated macro expand phase: [4], body = '${itemToString(body)}'`);
 
                 return body;

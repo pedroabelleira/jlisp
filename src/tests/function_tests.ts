@@ -14,7 +14,7 @@ assertRun("(/ 2 2)", 1);
 assertRun("(* 2 2 2)", 8);
 assertRun("(+ 1 1 (+ 1 1))", 4);
 assertRun('(concat "A" "B")', '"AB"');
-assertRun('(define val 2)', "");
+assertRun('(define val 2)', "2");
 assertRun('(define val 2) (+ val 1)', 3);
 assertRun('(define val (+ 1 1)) (+ val 1)', 3);
 assertRun('(+ (if (= 1 0) (+ 5 5) (+ 8 8)) 0)', 16);
