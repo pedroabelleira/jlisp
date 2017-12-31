@@ -1,5 +1,5 @@
 import { INamedFunction, IEnvironment, expandMacros, evalItem } from "./interpreter";
-import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT } from "./parser";
+import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT, StringType } from "./parser";
 import { RAW_NIL, RAW_TRUE, RAW_FALSE} from "./tokenizer";
 
 declare function require(string): any;

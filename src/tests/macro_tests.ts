@@ -205,8 +205,66 @@ assertRun(`
     (+ a 0)
 `, "5");
 
+assertRun(`
+    ;;; Check that 'native' works (1)
+    (native "1 + 1")
+`, 2);
+
+// assertRun(`
+//     ;;; Check that 'native' works (1)
+//     (defn sum (a b)
+//         ;;;(native "env.findVariable('a')")
+//         (native "console.log(env.findVariable('a')['num'])")
+//     )
+//     (sum 1 1)
+// `, 2);
+
+assertRun(`
+    ;;; Check that 'try' works (1)
+    (try
+        ;;;(native "env.findVariable('a')")
+        (+ 1 NaN)
+        20
+    )
+`, 20);
+
+assertRun(`
+    ;;; Check that 'try' works (2)
+    (try
+        ;;;(native "env.findVariable('a')")
+        (+ 1 1)
+        20
+    )
+`, 2);
+
+assertRunError(`
+    ;;; Check that 'throw' works (1)
+    (throw "My error message")
+`, "My error message");
 ///////////////////////////////
 });}
+
+assertRun(`
+    ;;; Check that 'try'-'catch' works 
+    (defn assert_positive (a) 
+        (if (>= a 0) 
+            true
+            (throw "Number is negative")
+        )
+    )
+    (assert_positive 5)
+`, RAW_TRUE);
+
+assertRunError(`
+    ;;; Check that 'try'-'catch' works 
+    (defn assert_positive (a) 
+        (if (>= a 0) 
+            true
+            (throw "Number is negative")
+        )
+    )
+    (assert_positive (- 0 1))
+`, "Number is negative");
 
 declare var module
 if (!module.parent) {
