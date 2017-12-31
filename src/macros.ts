@@ -1,4 +1,4 @@
-import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createSymbol, createList, FunctionType, createString, ListType } from "./parser";
+import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createSymbol, createList, FunctionType, createString, ListType, UNQUOTE, UNQUOTE_AT, QUOTE, QUASIQUOTE } from "./parser";
 import { IMacro, IEnvironment, evalItem, INamedFunction, expandMacros } from "./interpreter";
 import { debug } from "./debug";
 import { itemToString, createNamedFunction, itemsToString } from "./functions";
@@ -138,35 +138,13 @@ export class LambdaMacro implements IMacro {
     }
 }
 
-export class DefineMacroMacro implements IMacro {
-    name = 'define-macro';
-    expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || args.length != 2 || !args[0]) throw "define-macro expects 2 arguments";
-        if (args[0].type != Types.SYMBOL) {
-            throw `define-macro: first argument must be a variable name (line = ${args[0].line})`;
-        }
-        let nameMacro = (<VariableType>args[1]).name;
-        let macro = env.findMacro(nameMacro);
-        if (!macro) {
-            throw `define-macro: macro not found (${nameMacro})`
-        }
-
-        env.addMacro({
-            name: (<VariableType>args[0]).name,
-            expand: (_args: Item[], env: IEnvironment) => {
-                return macro.expand(_args, env);
-            }
-        });
-
-        return NIL;
-    }
-}
-
 export class DefMacroMacro implements IMacro {
     name = 'defmacro';
     expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || args.length != 3 || !args[0]) throw "[defmacro] expects 3 arguments";
+        if (!args || args.length > 3 || args.length < 2 || !args[0]) throw "[defmacro] expects 3 arguments";
         let [name, params, body] = args;
+
+        if (args.length == 2) return this.aliasMacro(args[0], args[1], env);
 
         if (name.type != Types.SYMBOL) throw `[defmacro] first argument must be a variable (line = ${name.line})`;
         if (params.type != Types.LIST) throw `[defmacro] second argument must be a list of symbols (line = ${params.line}`;
@@ -201,6 +179,26 @@ export class DefMacroMacro implements IMacro {
             }
         });
 
+        return NIL;
+    }
+
+    aliasMacro (alias: Item, existingMacro: Item, env: IEnvironment): Item {
+        if (!alias && alias .type != Types.SYMBOL) {
+            throw `[defmacro] with two arguments, the first of which must be a variable name (line = ${alias.line}`;
+        } 
+
+        let nameMacro = (<VariableType>existingMacro).name;
+        let macro = env.findMacro(nameMacro);
+        if (!macro) {
+            throw `defmacro: macro not found (${nameMacro})`
+        }
+
+        env.addMacro ({
+            name: (<VariableType>alias).name,
+            expand: (_args: Item[], env: IEnvironment) => {
+                return macro.expand(_args, env);
+            }
+        });
         return NIL;
     }
 }
@@ -280,24 +278,10 @@ export class QuoteMacro implements IMacro {
     }
 }
 
-export class QuasiQuoteMacro implements IMacro {
-    name = 'quasi-quote';
-    expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || args.length == 0 || args.length > 1) {
-            throw "'quote' takes exactly 1 argument";
-        }
-
-        return args[0];
-    }
-}
 export class UnquoteMacro implements IMacro {
     name = 'unquote';
     expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || args.length == 0 || args.length > 1) {
-            throw "'unquote' takes exactly 1 argument";
-        }
-
-        return expandMacros(expandMacros(args[0], env), env);
+        throw "[unquote] Unbalanced quotes: 'unquote' found without corrsponding ' or `";
     }
 }
 
@@ -336,13 +320,13 @@ export class ReadStringMacro implements IMacro {
 
 export const NATIVE_MACROS = [
     DefineMacro, IfMacro, EvalMacro, LambdaMacro, DefnMacro, BeginMacro,
-    WhileMacro, BreakMacro, SetBangMacro, QuoteMacro, UnquoteMacro,
-    DefineMacroMacro, ReadStringMacro, DefMacroMacro 
+    WhileMacro, BreakMacro, SetBangMacro, QuoteMacro, UnquoteMacro, //QuasiQuoteMacro,
+    ReadStringMacro, DefMacroMacro 
 ];
 
 export const LISP_MACROS = 
-`   (define-macro def define)
-    (define-macro fn lambda)
+`   (defmacro def define)
+    (defmacro fn lambda)
 
     (defmacro defun (name vars body)
         (list (quote define) name 

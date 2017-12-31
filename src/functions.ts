@@ -1,5 +1,5 @@
-import { INamedFunction, IEnvironment } from "./interpreter";
-import { Item, Types, NIL, TRUE, FALSE, createFunction, createString, createNumber, createList } from "./parser";
+import { INamedFunction, IEnvironment, expandMacros, evalItem } from "./interpreter";
+import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT } from "./parser";
 import { RAW_NIL, RAW_TRUE, RAW_FALSE} from "./tokenizer";
 
 declare function require(string): any;
@@ -205,6 +205,44 @@ export const StrToListFunction: INamedFunction = createNamedFunction('str->list'
     return createList(chars.map(s => createString(s)));
 });
 
+export const QuasiQuoteFunction: INamedFunction = createNamedFunction(QUASIQUOTE, (args: Item[], env: IEnvironment): Item => {
+    if (!args || args.length == 0 || args.length > 1) {
+        throw "'quasiquote' takes exactly 1 argument";
+    }
+    // console.log(`${QUASIQUOTE}: before applying macro, item = (quasiquote ${itemsToString(args)})`);
+    let ret = quasiquoteItem(args[0], env);
+    // console.log(`${QUASIQUOTE}: after applying macro1, item = ${itemToString(ret)}`);
+    ret = evalItem(ret, env);
+    // console.log(`${QUASIQUOTE}: after applying macro2, item = ${itemToString(ret)}`);
+    return ret;
+});
+
+function quasiquoteItem(item: Item, env: IEnvironment): Item {
+    switch (item.type) {
+        case Types.LIST:
+            let first = item.items[0];
+            if (first.type == Types.SYMBOL && first.name == UNQUOTE) {
+                return item.items[1];
+            } else if (first.type == Types.SYMBOL && first.name == UNQUOTE_AT) {
+                throw `[${QUASIQUOTE}] unquote-at not implemented yet`;
+            } else {
+                return createList([
+                    createSymbol("list"),
+                    ...item.items.map(it => quasiquoteItem(it, env))
+                ]);
+            }
+        case Types.SYMBOL:
+        case Types.NUMBER:
+        case Types.BOOLEAN:
+        case Types.NIL:
+            return createList([
+                createSymbol("quote"),
+                item
+            ]);
+    }
+
+}
+
 export const LISP_FUNCTIONS = 
 `
     (defn not (a)
@@ -241,5 +279,5 @@ export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, StrLenFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
     MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
-    StrToListFunction, IsEmptyFunction, LenFunction
+    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction
 ];

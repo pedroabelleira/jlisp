@@ -115,76 +115,12 @@ assertRun(`
     (car (cons 45 (list 2 3 4 5)))
 `, '45');
 
-
-assertRun(`
-    ;;; Check that quote / unquote works correctly 
-    (unquote (quote (= 1 1))
-`, RAW_TRUE);
-
-assertRun(`
-    ;;; Check that quote / unquote works correctly (2)
-    (define a 10)
-    (unquote (quote (set! a 1)))
-    (+ a 2)
-`, 3);
-
-assertRun(`
-    ;;; Check that quote / unquote works correctly (3)
-    (unquote (quote (def a 1)))
-    (+ a 2)
-`, 3);
-
-assertRun(`
-    ;;; Check that quote / unquote works correctly (3)
-    (unquote (quote (def a 1)))
-    (+ a 2)
-`, 3);
-
-assertRun(`
-    ;;; Check that quote / eval works correctly (4)
-    (def a 1)
-    (+ (eval (quote a)) 2)
-`, "3");
-
-assertRun(`
-    ;;; Check that quote / unquote works correctly (4)
-    (def a 1)
-    (+ (eval (quote a)) 2)
-`, "3");
-
-
-
-assertRun(`
-    ;;; Check that defmacro allows for basic macros with 1 argument 
-    (defmacro nil! (variable)
-        (list (quote set!) variable 3)
-    )
-    (define a 10)
-    (nil! a)
-    (+ a 0)
-`, 3);
-
-
-assertRun(`
-    ;;; Check that defmacro allows for less trivial macros 
-    (defmacro defn2 (name a b body)
-        (list (quote define) name 
-            (list (quote lambda)
-                (list a b) 
-                body
-            )
-        )
-    )
-    (defn2 sum a b (+ a b))
-    (sum 2 2)
-`, 4);
-
-// */
 //*/
 
 assertRun(`
-    ;;; Check that defmacro allows for less trivial macros 
-    (defmacro defn3 (name vars body)
+    ;;; Check that defn can be defined with a macro 
+
+    (defmacro testdefun (name vars body)
         (list (quote define) name 
             (list (quote lambda)
                 vars 
@@ -192,148 +128,82 @@ assertRun(`
             )
         )
     )
-    (defn3 sum (a b) (+ a b))
-    (sum 2 2)
-`, 4);
+
+    (testdefun sum (a b) (+ a b))
+    (sum 1 2)
+`, 3);
+
+
+assertRun(`
+    ;;; Check that defn can be defined with a macro with quotes syntax
+
+    (defmacro testdefun (name vars body)
+        \`(define ,name 
+            (lambda
+                ,vars 
+                ,body
+            )
+        )
+    )
+
+    (testdefun sum (a b) (+ a b))
+    (sum 1 2)
+`, 3);
+
+
+/*
+
+
 // */
+
+assertRun(`
+    ;;; Check that defmacro allows for basic macros with quote syntax 
+    (defmacro nil! (variable)
+        \`(set! ,variable 3)
+    )
+    (define a 10)
+    (nil! a)
+    (+ a 0)
+`, 3);
+
+assertRun(`
+    ;;; Check that defmacro allows for simple creation of macros
+    (defmacro mymacro (a b)
+        (list + a b)
+    )
+    (mymacro 30 12)
+`, 42);
+
+assertRun(`
+    ;;; Check that defmacro works correctly for plain (not containing macro) expressions
+    (defmacro eight () (+ 4 4))
+    (+ 0 (eight))
+`, "8");
+
+assertRun(`
+    ;;; Check that defmacro works correctly for quoted basic expressions 
+    (defmacro eight () (quote (+ 4 4)))
+    (eight)
+`, "8");
+
+
+assertRun(`
+    ;;; Check that defmacro works correctly for quoted basic expressions 
+    (defmacro unless (test arg1 arg2) 
+        \`(if (not ,test) ,arg1 ,arg2)
+    )
+    (unless (= 1 0) 5 0)
+`, "5");
+
 ///////////////////////////////////////////////////////////////////////
 // These don't work yet
 ///////////////////////////////////////////////////////////////////////
-
-// assertRun(`
-//     ;;; Check that defmacro allows for basic macros with quote syntax 
-//     (defmacro nil! (variable)
-//         \`(set! ,variable 3)
-//     )
-//     (define a 10)
-//     (nil! a)
-//     (+ a 0)
-// `, 3);
-
-
-// assertRunError(`
-//     ;;; Check that defmacro allows for basic macros with 1 argument 
-//     (defmacro nil! (var)
-//         ((quote set!) var 3)
-//     )
-//     (define a 10)
-//     (nil! a)
-//     (= a 123)
-// `, "symbol 'a' not found");
-
-// assertRun(`
-//     ;;; Check that defmacro allows for basic macro aliasing 
-//     (defmacro setq (a b)
-//         (list (quote set!) a b)
-//     )
-//     (def x 1)
-//     (setq x 2)
-//     (= x 2)
-// `, RAW_TRUE);
-
-// assertRun(`
-//     ;;; Check that defmacro allows for basic macros returning a value 
-//     (defmacro isnil? (var)
-//         ((quote list) (quote =) (quote var) (quote nil))
-//     )
-//     (isnil? a)
-// `, RAW_TRUE);
-
-// assertRun(`
-//     ;;; Check that defmacro allows for macro aliasing 
-//     (defmacro mymacro (a b)
-//         ((quote +) a b)
-//     )
-//     (mymacro 30 12)
-// `, 42);
-
-// assertRun(`
-//     ;;; Check that defmacro allows for simple creation of macros
-//     (defmacro mymacro (a b)
-//         (list + a b)
-//     )
-//     (mymacro 30 12)
-// `, 42);
-
-// assertRun(`
-//     ;;; Check that cons works correctly (2)
-
-//     (defn str (strings)
-//         (def tok (car strings))
-//         (if (> (strlen tok) 0) 
-//             (concat tok (str (cdr strings)))    
-//             ""
-//         )
-//     )
-
-//     (set! a (cons 1 (list 2 3)))
-//     (set! b (car (cdr a)))
-//     (+ b 0)
-// `, "2");
-
-// assertRun(`
-//     ;;; Check that str can be defined in lisp 
-
-//     (defn str (strings)
-//         (def tok (car (list strings)))
-//         (if (> (strlen tok) 0) 
-//             (concat tok (str (cdr strings)))    
-//             ""
-//         )
-//     )
-
-//     (print "***********")
-//     (print (str "Hi" " there!"))
-//     (= "Hello" (str "He" "llo"))
-
-// `, TRUE);
-
-// assertRun(`
-//     ;;; Check that str->list works correctly 
-//     (car (str->list "Hello"))
-// `, 'H');
-
-// assertRun(`
-//     ;;; Check that defmacro works correctly for plain (not containing macro) expressions
-//     (defmacro eight () (+ 4 4))
-//     (+ 0 (eight))
-// `, "8");
-
-// assertRun(`
-//     ;;; Check that defmacro works correctly for quoted basic expressions 
-//     (defmacro eight () (quote (+ 4 4)))
-//     (eight)
-// `, "8");
-
-// assertRun(`
-//     ;;; Check that defmacro works correctly for quoted basic expressions 
-//     (defmacro eight () (quote (+ 4 4)))
-//     (eight)
-// `, "8");
-
-// assertRun(`
-//     ;;; Check that defmacro works correctly for quoted basic expressions 
-//     (defmacro unless (test body) 
-//         (begin
-//             (print "******")
-//             (print body)
-//             (print "******")
-//             (def first (car body))
-//             (def second (car (cdr body)))
-//             (if (test) first second)
-//         )
-//     )
-//     (unless (= 1 0) 5 0)
-// `, "5");
-
-// assertRun(`
-//     ;;; Check that defmacro can be used for alias
-//     (defmacro mydef (test body) 
-//         (define test body)
-//     )
-//     (mydef a 10)
-//     (+ a 0) 
-// `, "5");
+assertRun(`
+    ;;; Check that defmacro can be used for alias
+    (defmacro myset! set!)
+    (myset! a 5) 
+    (+ a 0)
+`, "5");
 
 ///////////////////////////////
 });}
