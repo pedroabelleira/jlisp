@@ -102,3 +102,20 @@ export function assertEquals(test: () => any, result: any, name: string = "(anon
     debug("\nFinishing test--------------------\n\n");
     testsOK++;
 }
+
+export function assertError(body: () => any, errorMsg: string, name: string) {
+    debug("Starting test: -----------------\n" + name + '\n--------------------------------\n');
+    testsRun++;
+    try {
+        body();
+    } catch (ex) {
+        if (ex.indexOf(errorMsg) < 0) {
+            console.log("Error running test " + name) ;
+            console.log(`Expected: ${errorMsg}. Got '${ex}' instead\n\n`);
+            testsFail++;
+            return;
+        }
+    }
+    testsOK++;
+    debug("\nFinishing test--------------------\n\n");
+}

@@ -54,7 +54,8 @@ const PARSER_INTERNAL_PROP = "__parser_internal";
  * @param program Text of the program
  */
 export function parse(program: string): Item[] {
-    return parseTokenList(tokenize(program));
+    let toks = tokenize(program);
+    return parseTokenList(toks);
 }
 
 /**

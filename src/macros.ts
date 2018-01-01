@@ -82,6 +82,7 @@ export class TryMacro implements IMacro {
             try {
                 return evalItem(body, env);
             } catch (ex) {
+                env.addVariable("__exception__", createString(ex));
                 return evalItem(except, env);
             }
         })]);
@@ -363,7 +364,11 @@ export class ReadStringMacro implements IMacro {
                 case Types.NUMBER:
                 case Types.BOOLEAN:
                 case Types.SYMBOL:
-                    arg = evalItem(arg, env);
+                    try {
+                        arg = evalItem(arg, env);
+                    } catch (ex) {
+                        return createString("Exception parsing expression: " + ex);
+                    }
                     if (!arg || arg.type != Types.STRING) return arg;
                     // Intented passthrough
                 case Types.STRING:

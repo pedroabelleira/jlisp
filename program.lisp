@@ -1,16 +1,12 @@
-;;(defn replw (prompt)
-;;    (while true
-;;        (begin
-;;        (set! command (read prompt))
-;;        (if (= command "exit") (break))
-;;        (print (eval (read-string command))))))
-
 (defn replr (prompt)
     (begin
     (set! command (read prompt))
     (if (!= command "exit") 
         (begin
-        (print (eval (read-string command)))
+        (try 
+            (print (eval (read-string command)))
+            (print (concat "Error evaluating expression => '" __exception__ "'"))
+        )
         (replr prompt)))))
 
 (print "")

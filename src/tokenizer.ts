@@ -177,8 +177,8 @@ function readSymbol(ic: string, chars: string[]): RawToken {
     while(true) {
         let c = chars.shift();
 
-        if (isBlank(c) || isOpenParens(c) || isCloseParens(c)) {
-            chars.unshift(c);
+        if (!c || isBlank(c) || isOpenParens(c) || isCloseParens(c)) {
+            if (c) chars.unshift(c);
             if (ic == RAW_TRUE) {return {type: RawTokens.BOOLEAN, val: RAW_TRUE}}
             if (ic == RAW_FALSE) {return {type: RawTokens.BOOLEAN, val: RAW_FALSE}}
             if (ic == RAW_NIL) {return {type: RawTokens.NIL, val: RAW_NIL}}

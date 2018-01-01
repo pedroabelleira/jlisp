@@ -1,5 +1,5 @@
 import { run, runWithoutIncludes } from "../interpreter";
-import { assertEquals, runSuite } from "./testing";
+import { assertEquals, runSuite, assertRunError, assertError } from "./testing";
 import { debug } from "../debug";
 import { tokenize, tokenToString } from "../tokenizer";
 
@@ -15,10 +15,11 @@ assertEquals(() => tokenize("(= '1 1)").length, 6);
 assertEquals(() => tokenize("(= `1 1)").length, 6);
 assertEquals(() => tokenize("(= `1 ,1)").length, 7);
 assertEquals(() => tokenize("(= `1 ,@1)").length, 7);
+assertError(() => tokenize("d"), 'foooooo', 'Empty string');
 
-});}
+})};
 
-declare var module
+declare var module;
 if (!module.parent) {
     TOKENIZER_TESTS();
 }
