@@ -13,7 +13,7 @@ A Lisp intepreter implemented in Typescript
 
 ## Why?
 This is a project I did just for fun, so don't expect any advanced features or worry about performance, etc.
-This is only a tool to teach myself how languages work. 
+It only exists as a tool to teach myself how languages work. 
 
 ## Getting started
 Make sure you have npm installed on your machine. Then write
@@ -23,18 +23,23 @@ npm run full
 ```
 
 That will install dependencies, compile the source code, run the tests and, last, run the
-(extremally basic) REPL.
+(basic) REPL.
 
 Of course, you don't want to wait for the installation and compilation each time you change
 something, so 'tsc -w' is your friend and then you can use the normal npm commands:
 
 ```bash
-npm install   # Normally not needed
+npm install   # Normally only needed the first time
 npm run test  # This runs the tests and is what you execute all the time
-npm start     # It runs the REPL, but that doesn't really work yet
+npm start     # It runs the REPL
 ```
 
-If you want to also have some fun, at the end of this README.md file, there are some smallish tasks
+You can try whatever short pieces of code in the REPL. By now it should be robust enough to
+not die when errors occur. In order to try less trivial pieces of code, you can use the
+jlisp program in dist in order to load and execute files. Note that, for now, you will need
+to edit the source code of jlisp in order to make it load another file that program.lisp.
+
+If you want to modify some things inside the interpreter itself, at the end of this README.md file there are some smallish tasks
 that would be useful to do.
 
 ## Implementation
@@ -52,22 +57,13 @@ functions implemented as native (Typescript) code and a few more implemented in 
 
 Most of the less simple code is located in ./macros.ts. There there are the fundamental macros 
 'if', 'lambda' (also called 'fn'), 'define', 'defn', 'eval', ... The interpreter simply loads those macros in the
-runtime at the start, but they are not special. They can even be replaced by user code by simply defining new
+runtime at the start, but they are not otherwise special. They can even be replaced by user code by simply defining new
 macros with the same names.
-
-The most important macro to implement is the 'defmacro' macro, which would allow macros to be defined in List itself.
-That would make possible to reimplement some "native" (Typescript) macros in List and to extend the interpreter
-ad infinitum (that's the whole advantage of Lisp).
 
 Note that all the values are strongly typed at runtime. You can check the types of the language in the file ./parser.ts
 
 ## What next
 ### Big things
-#### Defmacro
-That's the most important addition: being able to define macros in Lisp itself. It is already (partially?) 
-implemented, but it must be checked that it supports non trivial case and that the new quote support
-works as it should.
-
 #### Object System
 Once defmacro works, I'd like to implement a simple object system on top of the language. Nothing as fancy as the
 object system in Common Lisp, but something simpler. The goal is to explore how much I can implement in
@@ -112,15 +108,20 @@ purely implemented in Lisp functions and macros and without any special support 
 ;; And now we have classes, etc
 ```
 
+#### Debugger
+Implementing a basic debugger should not be hard. The idea is to replicate the functionality of the
+interpreter, but with added functionality to break execution.
+
+#### "Compiler"
+- Implement a "compiler" to Javascript. I.e. produce a standalone Javascript program which can
+be distributed and would work in any decent runtime (Nashrom). 
+
 ### Small things
 - Add lots of functions for numbers, strings and lists. We need to decide what standard to follow.
 One obvious possibility is to take Common Lisp, but change the naming conventions to be more
 modern: use '!' and not 'q' as suffix to indicate mutability, use '?' and not 'p' to indicate
 boolean functions, use x->y to indicate a function which transforms from x to y in a 
 canonical way, etc.
-- Add standard List macros, natively if needed and later in Lisp (if defmacro finally works)
-- Implement a "compiler" to Javascript. I.e. produce a standalone Javascript program which can
-be distributed and would work in any decent runtime (Nashrom). 
 - Implement a non trivial Lisp program which runs on the interpreter
 - Implement a 'scheme' macro (to be used as (require 'scheme)) which renames the existing
 functions and variables to look more like scheme. The objective is to be able to try
@@ -131,3 +132,4 @@ at least it would allow to copy and paste code from books without too much troub
 conform to this interpreter names. That would allow the same effect, with less trouble in the
 runtime. Of course, ugly things could happen, so this would be a little bit less robust.
 - Add &rest support to 'lambda' macro.
+- Whatever is in the TODO file

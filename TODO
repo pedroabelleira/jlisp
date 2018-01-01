@@ -1,8 +1,11 @@
-- Fix QuasiQuoteMacro (it's not implemented yet)
 - More tests for while (check side effects and break)
-- Implement the 'defmacro' macro
-- Remove the 'define-macro' macro (or make it an alias for 'defmacro')
-- Add quotes ("'" "`" "," and ",@") to parser in order to make macros easier to write
 - Anything in the list at the bottom of README.md
 - Implement 'let'
 - Fix report and number lines: number lines are not being used consistently over the code
+- Implement a debugger
+- Fix REPL: handle for 1 symbol expresssions
+- Reduce to the minimum the amount of native code in functions and macros
+    - Divide the functions and macros in "essential" and "performance"
+    - Provide implementations in Lisp of "performance" macros and functions
+    - Leave the "performance" functions and macros in a file which can optionally be loaded
+    - Finish the implementation of the "native" macro
