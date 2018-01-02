@@ -157,6 +157,20 @@ assertRun(`
     (car (cdr (str->list "Hello")))
 `, '"e"');
 
+assertRun(`
+    ;;; Check that map works correctly 
+    (defn double (x)
+        (* 2 x)
+    )
+    (map double (list 2 3))
+`, '(4 6)');
+
+assertRun(`
+    ;;; Check that reduce works correctly 
+    (defn sumreducer (acc next) 
+        (+ acc next))
+    (reduce sumreducer (list 1 2 3 4 5) 0)
+`, '15');
 ////////////////////////////////////////////////////////////
 
 

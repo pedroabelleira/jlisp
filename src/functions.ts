@@ -1,5 +1,5 @@
 import { INamedFunction, IEnvironment, expandMacros, evalItem } from "./interpreter";
-import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT, StringType, SymbolType } from "./parser";
+import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT, StringType, SymbolType, ListType, FunctionType } from "./parser";
 import { RAW_NIL, RAW_TRUE, RAW_FALSE} from "./tokenizer";
 
 declare function require(string): any;
@@ -65,6 +65,26 @@ export const ReadFunction: INamedFunction = createNamedFunction('read', (args: I
     } else {
         return createString(readline.question("")); 
     }
+});
+
+export const MapFunction: INamedFunction = createNamedFunction('map', (args: Item[], env: IEnvironment): Item => {
+    if (!args || args.length < 2 || args[0].type != Types.FUNCTION || args[1].type != Types.LIST) {
+        throw "[map] function takes 2 arguments: a function and a list";
+    } 
+    let func = (<FunctionType> args[0]).call;
+    let ret = (<ListType>args[1]).items.map(el => func([el], env));
+    return createList([...ret]); 
+});
+
+export const ReduceFunction: INamedFunction = createNamedFunction('reduce', (args: Item[], env: IEnvironment): Item => {
+    if (!args || args.length < 2 || args[0].type != Types.FUNCTION || args[1].type != Types.LIST) {
+        throw "[reduce] function takes 2 required arguments: a function and a list and one optional argument: an initial value";
+    } 
+    let reducer = (<FunctionType> args[0]).call;
+    let list = (<ListType> args[1]).items;
+    let initial = args[2]? args[2]: NIL;
+    let ret = list.reduce((acc, next) => reducer([acc, next], env), args[2]);
+    return ret; 
 });
 
 export const ConcatFunction: INamedFunction = createNamedFunction('concat', (args: Item[]): Item => {
@@ -275,5 +295,6 @@ export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
     MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
-    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction 
+    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction,
+    MapFunction, ReduceFunction
 ];
