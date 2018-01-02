@@ -1,40 +1,8 @@
-import { Item, Types, VariableType, parse, TRUE, FALSE, NIL, createFunction, createSymbol, createList, FunctionType, createString, ListType, UNQUOTE, UNQUOTE_AT, QUOTE, QUASIQUOTE, StringType, createNumber } from "./parser";
+import { Item, Types, SymbolType, parse, TRUE, FALSE, NIL, createFunction, createSymbol, createList, FunctionType, createString, ListType, UNQUOTE, UNQUOTE_AT, QUOTE, QUASIQUOTE, StringType, createNumber } from "./parser";
 import { IMacro, IEnvironment, evalItem, INamedFunction, expandMacros } from "./interpreter";
 import { debug } from "./debug";
 import { itemToString, createNamedFunction, itemsToString } from "./functions";
 
-
-export class NativeMacro implements IMacro {
-    name = 'native';
-    expand = (args: Item[], env: IEnvironment): Item => {
-        if (!args || !args[0] || args[0].type != Types.STRING) {
-            throw "[native] macro takes 1 string argument";
-        }
-
-        let command =  (<StringType>args[0]).str;
-
-        return createList([ createFunction((args: Item[], env: IEnvironment): Item => {
-            let ret = eval(command);
-            switch (typeof(ret)) {
-                case 'boolean':
-                    if (ret) {return TRUE;} else {return FALSE;}
-                case 'string':
-                    return createString(ret);
-                case 'number':
-                    return createNumber(ret);
-                default:
-                    if (ret["slice"] && ret["map"] && ret["unshift"]) { // Probably a list
-                        return createList([...ret]);
-                    }
-                    if (ret["type"] && ret["type"]) {
-                        return ret;
-                    }
-                    throw "[native] code returned an invalid value";
-            }
-        })]);
-
-    }
-}
 
 export class BeginMacro implements IMacro {
     name = 'begin';
@@ -127,7 +95,7 @@ export class DefnMacro implements IMacro {
         let items = [];
 
         items.push(createSymbol('define', line));
-        items.push(createSymbol((<VariableType>args[0]).name, line));
+        items.push(createSymbol((<SymbolType>args[0]).name, line));
         items.push(createList([
             createSymbol('lambda'),
             args[1],
@@ -179,10 +147,10 @@ export class LambdaMacro implements IMacro {
             throw "[lambda] Function macro error: function parameters must be variable names: ";  
         }
 
-        return this.buildFunction(<VariableType[]> params.items, body, env);
+        return this.buildFunction(<SymbolType[]> params.items, body, env);
     }
 
-    private buildFunction (params: VariableType[], body: Item, _env: IEnvironment): FunctionType {
+    private buildFunction (params: SymbolType[], body: Item, _env: IEnvironment): FunctionType {
         return createFunction ((args: Item[], env: IEnvironment): Item => {
             let numParms = params?params.length: 0;
             let numArgs = args?args.length: 0;
@@ -216,7 +184,7 @@ export class DefMacroMacro implements IMacro {
         }
         if (body.type != Types.LIST) throw `[defmacro] body must be a list (line = ${params.line})`
 
-        let pars: VariableType[] = <VariableType[]> params.items;
+        let pars: SymbolType[] = <SymbolType[]> params.items;
         
         env.addMacro({
             name: name.name,
@@ -250,14 +218,14 @@ export class DefMacroMacro implements IMacro {
             throw `[defmacro] with two arguments, the first of which must be a variable name (line = ${alias.line}`;
         } 
 
-        let nameMacro = (<VariableType>existingMacro).name;
+        let nameMacro = (<SymbolType>existingMacro).name;
         let macro = env.findMacro(nameMacro);
         if (!macro) {
             throw `defmacro: macro not found (${nameMacro})`
         }
 
         env.addMacro ({
-            name: (<VariableType>alias).name,
+            name: (<SymbolType>alias).name,
             expand: (_args: Item[], env: IEnvironment) => {
                 return macro.expand(_args, env);
             }
@@ -385,10 +353,70 @@ export class ReadStringMacro implements IMacro {
     }
 }
 
+export class NativeMacro implements IMacro {
+    name = 'native';
+    expand = (_args: Item[], env: IEnvironment) => {
+        let [src, ...args] = _args;
+
+        if (!src || src.type != Types.STRING) {
+            throw "[native] macro takes a string argument as the first argument";
+        }
+        let source = src.str;
+        args = args? args: [];
+
+        if (args.filter(a => a.type != Types.SYMBOL).length > 0) {
+            throw "[native] macro takes 0 or more variables as the arguments following the first one";
+        }
+
+        return createList([ createFunction((items: Item[], env: IEnvironment) => {
+            let variables = args.reduce((acc, next) => acc + `let ${(<SymbolType>next).name} = ${unpack(next, env)}; `, "");
+            return pack(eval(variables + source));
+        })]);
+
+    }
+}
+
+function unpack(a: Item, env: IEnvironment): any {
+    switch (a.type) {
+        case Types.STRING:
+            return a.str;
+        case Types.NUMBER:
+            return a.num;
+        case Types.BOOLEAN:
+            return a.cond? true: false;
+        case Types.NIL:
+            return undefined;
+        case Types.SYMBOL: 
+            return unpack(env.findVariable(a.name), env);
+        case Types.LIST:
+            throw "[native] variable was not fully evaluated";
+
+    }
+}
+
+function pack(ret: any): Item {
+    switch (typeof(ret)) {
+        case 'boolean':
+            if (ret) {return TRUE;} else {return FALSE;}
+        case 'string':
+            return createString(ret);
+        case 'number':
+            return createNumber(ret);
+        default:
+            if (ret["slice"] && ret["map"] && ret["unshift"]) { // Probably a list
+                return createList([...ret]);
+            }
+            if (ret["type"] && ret["type"]) {
+                return ret;
+            }
+            throw "[native] code returned an invalid value";
+    }
+}
+
 export const NATIVE_MACROS = [
     DefineMacro, IfMacro, EvalMacro, LambdaMacro, DefnMacro, BeginMacro,
     WhileMacro, BreakMacro, SetBangMacro, QuoteMacro, UnquoteMacro,
-    ReadStringMacro, DefMacroMacro, NativeMacro, TryMacro, ThrowMacro
+    ReadStringMacro, DefMacroMacro, TryMacro, ThrowMacro, NativeMacro
 ];
 
 export const LISP_MACROS = 

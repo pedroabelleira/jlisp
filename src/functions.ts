@@ -1,5 +1,5 @@
 import { INamedFunction, IEnvironment, expandMacros, evalItem } from "./interpreter";
-import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT, StringType } from "./parser";
+import { Item, Types, NIL, TRUE, FALSE, QUASIQUOTE, createFunction, createString, createNumber, createList, createSymbol, UNQUOTE, UNQUOTE_AT, StringType, SymbolType } from "./parser";
 import { RAW_NIL, RAW_TRUE, RAW_FALSE} from "./tokenizer";
 
 declare function require(string): any;
@@ -240,8 +240,9 @@ function quasiquoteItem(item: Item, env: IEnvironment): Item {
                 item
             ]);
     }
-
 }
+
+
 
 export const LISP_FUNCTIONS = 
 `
@@ -279,5 +280,5 @@ export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, StrLenFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
     MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
-    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction
+    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction 
 ];

@@ -210,14 +210,20 @@ assertRun(`
     (native "1 + 1")
 `, 2);
 
-// assertRun(`
-//     ;;; Check that 'native' works (1)
-//     (defn sum (a b)
-//         ;;;(native "env.findVariable('a')")
-//         (native "console.log(env.findVariable('a')['num'])")
-//     )
-//     (sum 1 1)
-// `, 2);
+assertRun(`
+    ;;; Check that 'native' works (2)
+    (define a 1)
+    (native "a + 1" a)
+`, 2);
+
+
+assertRun(`
+    ;;; Check that 'native' works (1)
+    (defn sum (a b)
+        (native "a + b" a b)
+    )
+    (sum 1 2)
+`, 3);
 
 assertRun(`
     ;;; Check that 'try' works (1)
