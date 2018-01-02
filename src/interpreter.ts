@@ -45,7 +45,7 @@ export function evalItem(item: Item, env: IEnvironment): Item {
         case Types.SYMBOL:
             let variable = evalItem(env.findVariable(item.name), env);
             if (!variable || variable.type == Types.NIL) throw `Interpreter error: symbol '${item.name}' not found (line ${item.line})`;
-            ret = evalItem(variable, env);
+            ret = variable;
             break;
         case Types.LIST:
             trace = true;

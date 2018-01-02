@@ -143,7 +143,10 @@ export class LambdaMacro implements IMacro {
             throw "[lambda] Function macro error: first argument must be a list of parameters";
         }
 
-        if (params.items.filter(t => !!t).filter(t => t.type != Types.SYMBOL).length != 0) {
+        if (params.items.filter(t => !!t)
+                        .filter(t => t.type != Types.SYMBOL) 
+                        .length != 0) {
+            // console.log(JSON.stringify(params));
             throw "[lambda] Function macro error: function parameters must be variable names: ";  
         }
 
@@ -152,17 +155,26 @@ export class LambdaMacro implements IMacro {
 
     private buildFunction (params: SymbolType[], body: Item, _env: IEnvironment): FunctionType {
         return createFunction ((args: Item[], env: IEnvironment): Item => {
-            let numParms = params?params.length: 0;
+            params = params? params: [];
+            let numParms = params.length;
+            let names = params.map(p => p["name"]);
+            if (names.indexOf('&') > -1) {
+                numParms = numParms - (params.length - names.indexOf('&'));
+            }
             let numArgs = args?args.length: 0;
             if (numParms > numArgs) {
                 throw `[lambda] Insufficient number of arguments to the function: ${numArgs} received, at least ${numParms} expected`
             }
             let newEnv = env.createNestedEnvironment();
 
-            if (params && params.length > 0) {
-                params.forEach((par, index) => {
-                    newEnv.addVariable(par.name, args? args[index]: NIL);
-                });
+            let i:number = 0;
+            for (i = 0; i < params.length; i++) {
+                if (params[i].name == "&") {
+                    newEnv.addVariable(params[i+1].name, createList([createSymbol('list'), ...args.slice(i)]));
+                    break;
+                } else {
+                    newEnv.addVariable(params[i].name, args[i]? args[i]: NIL);
+                }
             }
             return evalItem(body, newEnv);
         }, body.line, "" + LambdaMacro.LAMBDAS++);

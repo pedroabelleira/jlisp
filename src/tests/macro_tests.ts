@@ -115,8 +115,6 @@ assertRun(`
     (car (cons 45 (list 2 3 4 5)))
 `, '45');
 
-//*/
-
 assertRun(`
     ;;; Check that defn can be defined with a macro 
 
@@ -149,12 +147,6 @@ assertRun(`
     (testdefun sum (a b) (+ a b))
     (sum 1 2)
 `, 3);
-
-
-/*
-
-
-// */
 
 assertRun(`
     ;;; Check that defmacro allows for basic macros with quote syntax 
@@ -195,9 +187,6 @@ assertRun(`
     (unless (= 1 0) 5 0)
 `, "5");
 
-///////////////////////////////////////////////////////////////////////
-// These don't work yet
-///////////////////////////////////////////////////////////////////////
 assertRun(`
     ;;; Check that defmacro can be used for alias
     (defmacro myset! set!)
@@ -255,7 +244,6 @@ assertRunError(`
     (throw "My error message")
 `, "My error message");
 ///////////////////////////////
-});}
 
 assertRun(`
     ;;; Check that 'try'-'catch' works 
@@ -278,7 +266,18 @@ assertRunError(`
     )
     (assert_positive (- 0 1))
 `, "Number is negative");
+// */
 
+
+assertRun(`
+    ;;; Check that variable desctructuring works in Lambda   
+    (defn slice (a b & rest)
+        (len rest))
+    (slice 0 1 2 3)
+`, "2");
+
+
+});}
 declare var module
 if (!module.parent) {
     MACRO_TESTS();
