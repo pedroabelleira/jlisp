@@ -59,18 +59,16 @@ export function parse(program: string): Item[] {
 }
 
 /**
- * Parses a list of tokens and constructs and return the syntax tree
+ * Parses a list of tokens and constructs and returns the syntax tree
  * The syntax tree is a list of atoms corresponding to the instructions in first level parenthesis.
  * @param tokens List of tokens representing the text of the program
  */
 export function parseTokenList(tokens: RawToken[]): Item[] {
     let items: Item[] = [];
 
-    let t = tokens.shift();
-
     while (tokens.length > 0) {
+        let t = tokens.shift();
         items.push(parseQuotedToken(t, tokens));
-        t = tokens.shift();
     }
 
     return items;
