@@ -3,6 +3,8 @@ import { LISP_FUNCTIONS, NATIVE_FUNCTIONS, itemToString, itemsToString } from ".
 import { NATIVE_MACROS, LISP_MACROS } from "./macros";
 import { debug } from "./debug";
 
+import {strlen} from "./functions";
+
 export function run(program: string): string {
     let macros = parse(LISP_MACROS);
     let functions = parse(LISP_FUNCTIONS); 

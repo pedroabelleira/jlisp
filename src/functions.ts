@@ -15,9 +15,9 @@ export function itemToString(item: Item, prettyPrint = false): string {
         case Types.NIL: return RAW_NIL;
         case Types.FUNCTION: 
             if (item.id) {
-                return '#Function<' + item.id + '>';
+                return `#<Function '${item.id}'>`;
             } else {
-                return '#Function<native>';
+                return '#<Function (native)>';
             }
         case Types.SYMBOL: return item.name;
         case Types.LIST:
@@ -73,11 +73,6 @@ export const ConcatFunction: INamedFunction = createNamedFunction('concat', (arg
         throw "[concat] function needs to be called with arguments of type string";
     }
     return createString(args.reduce((acc, next) => acc + next['str'], ""));
-});
-
-export const StrLenFunction: INamedFunction = createNamedFunction('strlen', (args: Item[]): Item => {
-    if (!args || args.length != 1 || args[0].type != Types.STRING) throw "[strlen] function takes 1 string argument";
-    return createNumber(String(args[0]["str"]).length);
 });
 
 export const EqualsFunction: INamedFunction = createNamedFunction('=', (args: Item[]): Item => {
@@ -277,7 +272,7 @@ export const LISP_FUNCTIONS =
 `;
 
 export const NATIVE_FUNCTIONS = [
-    ConcatFunction, PrintFunction, ReadFunction, StrLenFunction, EqualsFunction, 
+    ConcatFunction, PrintFunction, ReadFunction, EqualsFunction, 
     PlusFunction, MinusFunction, StarFunction, SlashFunction,
     MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
     StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction 

@@ -370,7 +370,8 @@ export class NativeMacro implements IMacro {
 
         return createList([ createFunction((items: Item[], env: IEnvironment) => {
             let variables = args.reduce((acc, next) => acc + `let ${(<SymbolType>next).name} = ${unpack(next, env)}; `, "");
-            return pack(eval(variables + source));
+            let command = variables + source;
+            return pack(eval(command));
         })]);
 
     }
@@ -379,18 +380,15 @@ export class NativeMacro implements IMacro {
 function unpack(a: Item, env: IEnvironment): any {
     switch (a.type) {
         case Types.STRING:
-            return a.str;
         case Types.NUMBER:
-            return a.num;
         case Types.BOOLEAN:
-            return a.cond? true: false;
+            return itemToString(a);
         case Types.NIL:
             return undefined;
         case Types.SYMBOL: 
             return unpack(env.findVariable(a.name), env);
         case Types.LIST:
-            throw "[native] variable was not fully evaluated";
-
+            return a.items.map(e => unpack(e, env));
     }
 }
 

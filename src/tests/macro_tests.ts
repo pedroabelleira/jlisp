@@ -225,11 +225,19 @@ assertRun(`
     (sum 1 2)
 `, 3);
 
+
+assertRun(`
+    (defn strleen (s)
+        (native "s? s.length: 0" s)
+    )
+    (strleen "abc")
+`, 3);
+
+
 assertRun(`
     ;;; Check that 'try' works (1)
     (try
-        ;;;(native "env.findVariable('a')")
-        (+ 1 NaN)
+        (+ 1 "ff")
         20
     )
 `, 20);
@@ -237,7 +245,6 @@ assertRun(`
 assertRun(`
     ;;; Check that 'try' works (2)
     (try
-        ;;;(native "env.findVariable('a')")
         (+ 1 1)
         20
     )
