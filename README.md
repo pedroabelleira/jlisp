@@ -7,8 +7,9 @@ A Lisp intepreter implemented in Typescript
     - [Implementation](#implementation)
     - [What next](#what-next)
         - [Big things](#big-things)
-            - [Defmacro](#defmacro)
             - [Object System](#object-system)
+            - [Debugger](#debugger)
+            - ["Compiler"](#compiler)
         - [Small things](#small-things)
 
 ## Why?
@@ -16,14 +17,14 @@ This is a project I did just for fun, so don't expect any advanced features or w
 It only exists as a tool to teach myself how languages work. 
 
 ## Getting started
-Make sure you have npm installed on your machine. Then write
+Make sure you have npm installed on your machine and you cloned this repository. Then write
 
 ```bash
 npm run full
 ```
 
 That will install dependencies, compile the source code, run the tests and, last, run the
-(basic) REPL.
+REPL.
 
 Of course, you don't want to wait for the installation and compilation each time you change
 something, so 'tsc -w' is your friend and then you can use the normal npm commands:
@@ -36,8 +37,13 @@ npm start     # It runs the REPL
 
 You can try whatever short pieces of code in the REPL. By now it should be robust enough to
 not die when errors occur. In order to try less trivial pieces of code, you can use the
-jlisp program in dist in order to load and execute files. Note that, for now, you will need
-to edit the source code of jlisp in order to make it load another file that program.lisp.
+'jlisp.js' program that you can find in the 'dist' folder in order to load and execute files. You can invoke the program like this:
+
+```bash
+node jlisp.js my_program.lisp
+```
+
+where 'my_program.lisp' is the program you want to try.
 
 If you want to modify some things inside the interpreter itself, at the end of this README.md file there are some smallish tasks
 that would be useful to do.
