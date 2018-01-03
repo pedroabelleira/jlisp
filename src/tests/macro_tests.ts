@@ -158,19 +158,19 @@ assertRun(`
     (+ a 0)
 `, 3);
 
-assertRun(`
-    ;;; Check that defmacro allows for simple creation of macros
-    (defmacro mymacro (a b)
-        (list + a b)
-    )
-    (mymacro 30 12)
-`, 42);
+// assertRun(`
+//     ;;; Check that defmacro allows for simple creation of macros
+//     (defmacro mymacro (a b)
+//         (+ a b)
+//     )
+//     (mymacro 30 12)
+// `, 42);
 
-assertRun(`
-    ;;; Check that defmacro works correctly for plain (not containing macro) expressions
-    (defmacro eight () (+ 4 4))
-    (+ 0 (eight))
-`, "8");
+// assertRun(`
+//     ;;; Check that defmacro works correctly for plain (not containing macro) expressions
+//     (defmacro eight () (+ 4 4))
+//     (+ 0 (eight))
+// `, "8");
 
 assertRun(`
     ;;; Check that defmacro works correctly for quoted basic expressions 
@@ -226,7 +226,7 @@ assertRun(`
 assertRun(`
     ;;; Check that 'try' works (1)
     (try
-        (+ 1 "ff")
+        (+ 1 ff)
         20
     )
 `, 20);
@@ -243,7 +243,6 @@ assertRunError(`
     ;;; Check that 'throw' works (1)
     (throw "My error message")
 `, "My error message");
-///////////////////////////////
 
 assertRun(`
     ;;; Check that 'try'-'catch' works 
@@ -266,8 +265,6 @@ assertRunError(`
     )
     (assert_positive (- 0 1))
 `, "Number is negative");
-// */
-
 
 assertRun(`
     ;;; Check that variable desctructuring works in Lambda   
@@ -275,6 +272,17 @@ assertRun(`
         (len rest))
     (slice 0 1 2 3)
 `, "2");
+
+assertRun(`
+    ;;; Check that variable desctructuring works in Lambda   
+    (defn slice (& rest)
+        (len rest))
+    (slice 0 1 2 3)
+`, "4");
+
+// */
+
+
 
 
 });}

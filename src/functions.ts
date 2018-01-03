@@ -95,55 +95,6 @@ export const ConcatFunction: INamedFunction = createNamedFunction('concat', (arg
     return createString(args.reduce((acc, next) => acc + next['str'], ""));
 });
 
-export const EqualsFunction: INamedFunction = createNamedFunction('=', (args: Item[]): Item => {
-    if (!args || args.length != 2) {
-        throw "[=] function takes 2 arguments"
-    }
-    let a = args[0];
-    let b = args[1];
-    return itemToString(a) === itemToString(b)? TRUE: FALSE;
-});
-
-export const PlusFunction: INamedFunction = createNamedFunction('+', (args: Item[]): Item => {
-    if (!args || args.length < 2) {
-        throw "[+] function takes 2 or more number arguments";
-    }
-    if (!args.reduce((acc, next) => acc && next.type == Types.NUMBER, true)) throw "[+] function takes only number arguments";
-    return createNumber(args.reduce((acc, next) => acc + Number(next["num"]), 0));
-});
-
-export const StarFunction: INamedFunction = createNamedFunction('*', (args: Item[]): Item => {
-    if (!args || args.length < 2) {
-        throw "[*] function takes 2 or more number arguments";
-    }
-    if (!args.reduce((acc, next) => acc && next.type == Types.NUMBER, true)) throw "[*] function takes only number arguments";
-    return createNumber(args.reduce((acc, next) => acc * Number(next["num"]), 1));
-});
-
-export const MinusFunction: INamedFunction = createNamedFunction('-', (args: Item[]): Item => {
-    if (!args || args.length != 2) {
-        throw "[-] function takes 2 number arguments";
-    }
-    if (!args.reduce((acc, next) => acc && next.type == Types.NUMBER, true)) throw "[-] function takes only number arguments";
-    return createNumber(args[0]["num"] - args[1]["num"]);
-});
-
-export const SlashFunction: INamedFunction = createNamedFunction('/', (args: Item[]): Item => {
-    if (!args || args.length != 2) {
-        throw "[/] function takes 2 number arguments";
-    }
-    if (!args.reduce((acc, next) => acc && next.type == Types.NUMBER, true)) throw "[/] function takes only number arguments";
-    return createNumber(args[0]["num"] / args[1]["num"]);
-});
-
-export const MinorThanFunction: INamedFunction = createNamedFunction('<', (args: Item[]): Item => {
-    if (!args || args.length != 2) {
-        throw "[<] function takes 2 number arguments";
-    }
-    if (!args.reduce((acc, next) => acc && next.type == Types.NUMBER, true)) throw "[<] function takes only number arguments";
-    return (args[0]["num"] < args[1]["num"])? TRUE: FALSE;
-});
-
 export const CarFunction: INamedFunction = createNamedFunction('car', (args: Item[]): Item => {
     if (!args || args[0].type != Types.LIST) {
         throw "[car] function takes 1 list argument";
@@ -257,10 +208,14 @@ function quasiquoteItem(item: Item, env: IEnvironment): Item {
     }
 }
 
-
-
 export const LISP_FUNCTIONS = 
 `
+    (defn = (a b)
+        (native "a === b" a b))
+
+    (defn < (a b)
+        (native "a < b" a b))
+
     (defn not (a)
         (if a false true))
 
@@ -282,19 +237,36 @@ export const LISP_FUNCTIONS =
     (defn != (a b)
         (not (= a b)))
 
-;;    (defn len (lis) ;; FIXME: Why this function does not work??
-;;        (if (empty? lis) 
-;;            0
-;;            (+ 1 (len (cdr lis)))))
-
     (defn strlen (s)
        (len (str->list s)))
+
+    (defn + (& args)
+        (reduce (lambda (acc next) (native "acc + next" acc next)) args 0))
+
+    (defn - (a b)
+        (native "a - b" a b))
+
+    (defn * (& args)
+        (reduce (lambda (acc next) (native "acc * next" acc next)) args 1))
+
+    (defn / (a b)
+        (native "a / b" a b))
+
+    ;;(defn car (first & rest) first)
+    ;;(defn cdr (first & rest) rest)
+
+    (defn str (& args)
+        (reduce (lambda (acc next) (native "String(acc) + String(next)" acc next)) args ""))
+
+    (def concat str) 
+
+    ;;(defn list (& args) args) // FIXME: it seems that destructuring doesn't work for lists of length 0
+
 `;
 
 export const NATIVE_FUNCTIONS = [
-    ConcatFunction, PrintFunction, ReadFunction, EqualsFunction, 
-    PlusFunction, MinusFunction, StarFunction, SlashFunction,
-    MinorThanFunction, CdrFunction, CarFunction, ConsFunction, ListFunction,
+    ConcatFunction, PrintFunction, ReadFunction, 
+    CdrFunction, CarFunction, ConsFunction, ListFunction,
     StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction,
     MapFunction, ReduceFunction
 ];

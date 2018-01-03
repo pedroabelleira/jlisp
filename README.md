@@ -115,19 +115,20 @@ purely implemented in Lisp functions and macros and without any special support 
 ```
 
 #### Debugger
-Implementing a basic debugger should not be hard. The idea is to replicate the functionality of the
-interpreter, but with added functionality to break execution.
+Implementing a basic debugger should not be hard. The idea is to have a special version of the interpreter, which
+controls the execution of any instruction checking it against the 'line' property in every of them.
 
 #### "Compiler"
 - Implement a "compiler" to Javascript. I.e. produce a standalone Javascript program which can
 be distributed and would work in any decent runtime (Nashrom). 
 
+#### Return
+- In order to facilitate a more imperative style of programming, implement a 'return' function that
+leaves the current function with a given value. The interpreter and block constructions as begin, while, etc.
+need to support. Otherwise, have a look at using continuations.
+
 ### Small things
-- Add lots of functions for numbers, strings and lists. We need to decide what standard to follow.
-One obvious possibility is to take Common Lisp, but change the naming conventions to be more
-modern: use '!' and not 'q' as suffix to indicate mutability, use '?' and not 'p' to indicate
-boolean functions, use x->y to indicate a function which transforms from x to y in a 
-canonical way, etc.
+- Add the usual functions for numbers, strings and lists. We can take the RxRS standard from Scheme.
 - Implement a non trivial Lisp program which runs on the interpreter
 - Implement a 'scheme' macro (to be used as (require 'scheme)) which renames the existing
 functions and variables to look more like scheme. The objective is to be able to try
