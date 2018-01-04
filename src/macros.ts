@@ -133,27 +133,41 @@ export class LambdaMacro implements IMacro {
      * @param args 
      */
     private buildLambdaItem(args: Item[], env: IEnvironment): Item {
-        if (!args || args.length == 0) return undefined; // FIXME: check exactly 2 arguments, etc.
-        let params = args[0];
-        let body = args[1];
+        if (!args || args.length < 2) throw "[lambda] macro takes 2, 3 or 4 arguments: (id?, description?, variables, body)";
+        let [id, desc, params, body, ...rest] = args;
+        let strid = "";
+        let strdesc = "";
+
+        // Handle optional parameters
+        if (!id || id.type == Types.NIL || id.type != Types.STRING) {
+            params = id;
+            body = desc;
+            strid ="(anonymous lambda #" + LambdaMacro.LAMBDAS++ + ")"; 
+            strdesc = undefined; 
+        } else if (!desc || desc.type == Types.NIL || desc.type != Types.STRING) {
+            body = params;
+            params = desc;
+            strid = id.str;
+            strdesc = undefined;
+        } else {
+            strid = id.str;
+            strdesc = desc.str;
+        }
 
         body = expandMacros(body, env);
 
-        if (!params || params.type != Types.LIST) {
-            throw "[lambda] Function macro error: first argument must be a list of parameters";
-        }
+        params = <ListType> params; // Keep compier happy
 
         if (params.items.filter(t => !!t)
                         .filter(t => t.type != Types.SYMBOL) 
                         .length != 0) {
-            // console.log(JSON.stringify(params));
             throw "[lambda] Function macro error: function parameters must be variable names: ";  
         }
 
-        return this.buildFunction(<SymbolType[]> params.items, body, env);
+        return this.buildFunction(<SymbolType[]> params.items, body, env, strid, strdesc);
     }
 
-    private buildFunction (params: SymbolType[], body: Item, _env: IEnvironment): FunctionType {
+    private buildFunction (params: SymbolType[], body: Item, _env: IEnvironment, id?: string, desc?: string): FunctionType {
         return createFunction ((args: Item[], env: IEnvironment): Item => {
             params = params? params: [];
             let numParms = params.length;
@@ -177,7 +191,7 @@ export class LambdaMacro implements IMacro {
                 }
             }
             return evalItem(body, newEnv);
-        }, body.line, "" + LambdaMacro.LAMBDAS++);
+        }, body.line, id, desc);
     }
 }
 
