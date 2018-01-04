@@ -158,19 +158,6 @@ export const LenFunction: INamedFunction = createNamedFunction('len', (args: Ite
 
 });
 
-export const StrToListFunction: INamedFunction = createNamedFunction('str->list', (args: Item[], env: IEnvironment): Item => {
-    if (!args) return NIL;
-    let arg = args[0];
-
-    if (!arg || args.length > 1 || arg.type != Types.STRING) {
-        throw "[str->list] function takes 1 string argument";
-    }
-
-    let chars = arg.str.split("");
-
-    return createList(chars.map(s => createString(s)));
-});
-
 export const QuasiQuoteFunction: INamedFunction = createNamedFunction(QUASIQUOTE, (args: Item[], env: IEnvironment): Item => {
     if (!args || args.length == 0 || args.length > 1) {
         throw "'quasiquote' takes exactly 1 argument";
@@ -237,8 +224,21 @@ export const LISP_FUNCTIONS =
     (defn != (a b)
         (not (= a b)))
 
+    (defn string? (s)
+        (native "typeof(s) === 'string'" s))
+
+    (defn number? (s)
+        (native "typeof(s) === 'number'" s))
+
+    (defn str->list (s) 
+        (begin
+            (if (not (string? s)) (throw "[str->list] argument must be a string"))
+            (native "s? s.split(''): ''" s)))
+
     (defn strlen (s)
-       (len (str->list s)))
+        (begin
+            (if (not (string? s)) (throw "[strlen] takes 1 string argument"))
+            (len (str->list s))))
 
     (defn + (& args)
         (reduce (lambda (acc next) (native "acc + next" acc next)) args 0))
@@ -262,11 +262,12 @@ export const LISP_FUNCTIONS =
 
     ;;(defn list (& args) args) // FIXME: it seems that destructuring doesn't work for lists of length 0
 
+
 `;
 
 export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, 
     CdrFunction, CarFunction, ConsFunction, ListFunction,
-    StrToListFunction, IsEmptyFunction, LenFunction, QuasiQuoteFunction,
+    IsEmptyFunction, LenFunction, QuasiQuoteFunction,
     MapFunction, ReduceFunction
 ];

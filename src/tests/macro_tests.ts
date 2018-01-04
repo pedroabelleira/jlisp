@@ -62,7 +62,7 @@ assertRun(`
         (+ 1 1)
         (- 1 1)
     )
-`, RAW_NIL); // Changed the convention. Begin now always returns nil
+`, 0); // Changed the convention again. Begin now returns last evaluated expression 
 
 assertRun(`
     ;;; Check that 'begin' macro works with macros
@@ -281,8 +281,6 @@ assertRun(`
 `, "4");
 
 // */
-
-
 
 
 });}

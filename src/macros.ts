@@ -10,7 +10,7 @@ export class BeginMacro implements IMacro {
         args = args.map(a => expandMacros(a, env));
 
         return createList([ createFunction((items: Item[], env: IEnvironment): Item => {
-            return NIL; // No need to do anything, since args are evaluated before calling this function
+            return items[items.length -1]; // No need to do anything, since args are evaluated before calling this function
         }), ...args]);
     }
 }
@@ -381,9 +381,8 @@ export class NativeMacro implements IMacro {
         }
 
         return createList([ createFunction((items: Item[], env: IEnvironment) => {
-            let variables = args.reduce((acc, next) => acc + `let ${(<SymbolType>next).name} = ${unpack(next, env)}; `, "");
-            let command = variables + source;
-            return pack(eval(command));
+            let variables:string = args.reduce((acc, next) => acc + `let ${(<SymbolType>next).name} = ${unpack(next, env)}; `, "");
+            return pack(eval(variables + source));
         })]);
 
     }
@@ -392,6 +391,9 @@ export class NativeMacro implements IMacro {
 function unpack(a: Item, env: IEnvironment): any {
     switch (a.type) {
         case Types.STRING:
+            let str = a.str;
+            str = str.replace(/\"/g, "\\\"").replace(/\'/g, "\\\'");
+            return '"' + str + '"';
         case Types.NUMBER:
         case Types.BOOLEAN:
             return itemToString(a);
@@ -414,7 +416,7 @@ function pack(ret: any): Item {
             return createNumber(ret);
         default:
             if (ret["slice"] && ret["map"] && ret["unshift"]) { // Probably a list
-                return createList([...ret]);
+                return createList([...ret.map(el => pack(el))]);
             }
             if (ret["type"] && ret["type"]) {
                 return ret;

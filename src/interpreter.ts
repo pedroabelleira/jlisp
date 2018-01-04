@@ -139,7 +139,6 @@ export interface IEnvironment {
     createNestedEnvironment(): IEnvironment;
 }
 
-
 class Environment implements IEnvironment {
     private ownSymbols: {} = {};
     private macros: {} = {};
