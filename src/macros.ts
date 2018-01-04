@@ -98,8 +98,10 @@ export class DefnMacro implements IMacro {
         items.push(createSymbol((<SymbolType>args[0]).name, line));
         items.push(createList([
             createSymbol('lambda'),
+            createString(args[0]["name"]),
             args[1],
-            args[2]
+            args[2],
+            args[3]
         ]));
 
         let ret = expandMacros(createList(items), env);
@@ -406,6 +408,8 @@ function unpack(a: Item, env: IEnvironment): any {
     switch (a.type) {
         case Types.STRING:
             let str = a.str;
+            str = str || '';
+            str = String(str); // Avoid exceptions when things go wrong
             str = str.replace(/\"/g, "\\\"").replace(/\'/g, "\\\'");
             return '"' + str + '"';
         case Types.NUMBER:

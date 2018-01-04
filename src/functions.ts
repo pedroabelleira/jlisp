@@ -158,6 +158,17 @@ export const LenFunction: INamedFunction = createNamedFunction('len', (args: Ite
 
 });
 
+export const DocFunction: INamedFunction = createNamedFunction('doc', (args: Item[], env: IEnvironment): Item => {
+    if (!args) return NIL;
+    let arg = args[0];
+
+    if (!arg || args.length > 1 || arg.type != Types.FUNCTION) {
+        throw "[doc] function takes 1 function argument";
+    }
+
+    return createString(arg.description? arg.description: "No documentation for '" + arg.id + "'");
+});
+
 export const QuasiQuoteFunction: INamedFunction = createNamedFunction(QUASIQUOTE, (args: Item[], env: IEnvironment): Item => {
     if (!args || args.length == 0 || args.length > 1) {
         throw "'quasiquote' takes exactly 1 argument";
@@ -252,22 +263,19 @@ export const LISP_FUNCTIONS =
     (defn / (a b)
         (native "a / b" a b))
 
-    ;;(defn car (first & rest) first)
-    ;;(defn cdr (first & rest) rest)
-
     (defn str (& args)
         (reduce (lambda (acc next) (native "String(acc) + String(next)" acc next)) args ""))
 
     (def concat str) 
 
+    ;;(defn car (first & rest) first)
+    ;;(defn cdr (first & rest) rest)
     ;;(defn list (& args) args) // FIXME: it seems that destructuring doesn't work for lists of length 0
-
-
 `;
 
 export const NATIVE_FUNCTIONS = [
     ConcatFunction, PrintFunction, ReadFunction, 
     CdrFunction, CarFunction, ConsFunction, ListFunction,
     IsEmptyFunction, LenFunction, QuasiQuoteFunction,
-    MapFunction, ReduceFunction
+    MapFunction, ReduceFunction, DocFunction
 ];
