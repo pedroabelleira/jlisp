@@ -16,7 +16,11 @@ A Lisp intepreter implemented in Typescript
 This is a project I did just for fun, so don't expect any advanced features or worry about performance, etc.
 It only exists as a tool to teach myself how languages work. 
 
+Also, I didn't know any Lisp, when writing this, so many things don't actually make sense.
+
 ## Getting started
+(This has not been updated for more than a year. Good luck making it work).
+
 Make sure you have npm installed on your machine and you cloned this repository. Then write
 
 ```bash
@@ -70,7 +74,12 @@ Note that all the values are strongly typed at runtime. You can check the types 
 
 ## What next
 ### Big things
+#### Fix the special form implementation
+I implemented the special forms in a complete wrong way, as a sort of functions. Special forms should have special treatment. This should be reimplemented.
+
 #### Object System
+(This doesn't make much sense, now that I know some Lisp)
+
 Once defmacro works, I'd like to implement a simple object system on top of the language. Nothing as fancy as the
 object system in Common Lisp, but something simpler. The goal is to explore how much I can implement in
 pure Lisp code, without support from the interpreter 
